@@ -138,3 +138,72 @@ export function calculateAmortization(input: MortgageInput, baseDate: Date = new
         monthsSaved: standardMonths - schedule.length
     };
 }
+
+export interface ExternalLoanInput {
+    amount: number;
+    annualRate: number;
+    termMonths: number;
+}
+
+export interface ArbitrageSummary {
+    externalMonthlyPayment: number;
+    externalTotalInterest: number;
+    newMortgageInterest: number;
+    baselineMortgageInterest: number;
+    mortgageInterestSaved: number;
+    netSavings: number;
+    newPayoffMonths: number;
+    baselinePayoffMonths: number;
+    monthsSaved: number;
+    isProfitable: boolean;
+}
+
+/**
+ * Evaluates the net savings of taking an external loan to make a lump-sum payment on the mortgage.
+ */
+export function calculateArbitrage(mortgageInput: MortgageInput, externalLoan: ExternalLoanInput): ArbitrageSummary {
+    // 1. Calculate baseline mortgage without the external lump sum
+    const baselineSummary = calculateAmortization({
+        ...mortgageInput,
+        oneTimePayment: 0, // Reset lump sum to 0 for baseline
+        oneTimePaymentMonth: 0
+    });
+
+    // 2. Calculate the external loan cost
+    const extR = externalLoan.annualRate / 100 / 12;
+    const extN = externalLoan.termMonths;
+    let externalMonthlyPayment = 0;
+
+    if (extR === 0) {
+        externalMonthlyPayment = externalLoan.amount / extN;
+    } else {
+        externalMonthlyPayment = (externalLoan.amount * extR * Math.pow(1 + extR, extN)) / (Math.pow(1 + extR, extN) - 1);
+    }
+
+    const externalTotalPayment = externalMonthlyPayment * extN;
+    const externalTotalInterest = externalTotalPayment - externalLoan.amount;
+
+    // 3. Calculate new mortgage WITH the lump sum
+    const newMortgageSummary = calculateAmortization({
+        ...mortgageInput,
+        oneTimePayment: externalLoan.amount,
+        oneTimePaymentMonth: 1 // applied immediately
+    });
+
+    // 4. Compare
+    const mortgageInterestSaved = baselineSummary.totalInterest - newMortgageSummary.totalInterest;
+    const netSavings = mortgageInterestSaved - externalTotalInterest;
+
+    return {
+        externalMonthlyPayment,
+        externalTotalInterest,
+        baselineMortgageInterest: baselineSummary.totalInterest,
+        newMortgageInterest: newMortgageSummary.totalInterest,
+        mortgageInterestSaved,
+        netSavings,
+        newPayoffMonths: newMortgageSummary.totalMonths,
+        baselinePayoffMonths: baselineSummary.totalMonths,
+        monthsSaved: baselineSummary.totalMonths - newMortgageSummary.totalMonths,
+        isProfitable: netSavings > 0
+    };
+}
