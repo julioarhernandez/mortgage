@@ -143,6 +143,7 @@ export interface ExternalLoanInput {
     amount: number;
     annualRate: number;
     termMonths: number;
+    isInterestOnly?: boolean;
 }
 
 export interface ArbitrageSummary {
@@ -173,15 +174,19 @@ export function calculateArbitrage(mortgageInput: MortgageInput, externalLoan: E
     const extR = externalLoan.annualRate / 100 / 12;
     const extN = externalLoan.termMonths;
     let externalMonthlyPayment = 0;
+    let externalTotalInterest = 0;
 
     if (extR === 0) {
         externalMonthlyPayment = externalLoan.amount / extN;
+        externalTotalInterest = 0;
+    } else if (externalLoan.isInterestOnly) {
+        externalMonthlyPayment = externalLoan.amount * extR;
+        externalTotalInterest = externalMonthlyPayment * extN;
     } else {
         externalMonthlyPayment = (externalLoan.amount * extR * Math.pow(1 + extR, extN)) / (Math.pow(1 + extR, extN) - 1);
+        const externalTotalPayment = externalMonthlyPayment * extN;
+        externalTotalInterest = externalTotalPayment - externalLoan.amount;
     }
-
-    const externalTotalPayment = externalMonthlyPayment * extN;
-    const externalTotalInterest = externalTotalPayment - externalLoan.amount;
 
     // 3. Calculate new mortgage WITH the lump sum
     const newMortgageSummary = calculateAmortization({

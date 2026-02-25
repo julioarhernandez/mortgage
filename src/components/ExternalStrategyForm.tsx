@@ -83,6 +83,18 @@ export function ExternalStrategyForm({ externalLoan, onChange, enabled, onToggle
                             </div>
                         </div>
                     </div>
+
+                    <div className="input-group">
+                        <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', gap: '8px', color: 'var(--text-main)' }}>
+                            <input
+                                type="checkbox"
+                                checked={externalLoan.isInterestOnly || false}
+                                onChange={(e) => handleChange('isInterestOnly', e.target.checked as any)}
+                                style={{ width: '18px', height: '18px', accentColor: 'var(--accent-primary)' }}
+                            />
+                            <span>Calculate as Interest-Only HELOC (Principal paid at end of term)</span>
+                        </label>
+                    </div>
                 </div>
             )}
         </div>
