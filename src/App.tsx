@@ -1,6 +1,8 @@
 import { useState, useMemo } from 'react';
+import { ChevronDown, ChevronUp } from 'lucide-react';
 import { calculateAmortization, calculateArbitrage, calculateRefinance, type MortgageInput, type ExternalLoanInput, type RefinanceInput } from './utils/mortgage';
 import { CalculatorForm } from './components/CalculatorForm';
+import { ExtraPaymentsForm } from './components/ExtraPaymentsForm';
 import { SummaryCards } from './components/SummaryCards';
 import { AmortizationChart } from './components/AmortizationChart';
 import { AmortizationTable } from './components/AmortizationTable';
@@ -38,9 +40,20 @@ function App() {
 
   const [activeStrategy, setActiveStrategy] = useState<'none' | 'arbitrage' | 'refinance'>('none');
 
+  const [extraPaymentsEnabled, setExtraPaymentsEnabled] = useState(false);
+  const [isAmortizationExpanded, setIsAmortizationExpanded] = useState(false);
+
   const summary = useMemo(() => {
-    return calculateAmortization(input);
-  }, [input]);
+    const activeInput = { ...input };
+    if (!extraPaymentsEnabled) {
+      activeInput.extraMonthlyPayment = 0;
+      activeInput.extraYearlyPayment = 0;
+      activeInput.oneTimePayment = activeStrategy === 'arbitrage' ? externalLoan.amount : 0;
+    } else if (activeStrategy === 'arbitrage') {
+      activeInput.oneTimePayment = (activeInput.oneTimePayment || 0) + externalLoan.amount;
+    }
+    return calculateAmortization(activeInput);
+  }, [input, extraPaymentsEnabled, activeStrategy, externalLoan]);
 
   const arbitrage = useMemo(() => {
     if (activeStrategy !== 'arbitrage') return null;
@@ -65,6 +78,12 @@ function App() {
         {/* Left Column: Form */}
         <div style={{ gridColumn: '1 / 2', display: 'flex', flexDirection: 'column', gap: 'var(--space-lg)' }}>
           <CalculatorForm input={input} onChange={setInput} />
+          <ExtraPaymentsForm
+            input={input}
+            onChange={setInput}
+            enabled={extraPaymentsEnabled}
+            onToggleEnabled={setExtraPaymentsEnabled}
+          />
           <ExternalStrategyForm
             externalLoan={externalLoan}
             onChange={setExternalLoan}
@@ -93,8 +112,21 @@ function App() {
       </div>
 
       <div className="glass-panel" style={{ marginTop: 'var(--space-xl)', padding: 'var(--space-lg)' }}>
-        <h2 style={{ marginBottom: 'var(--space-md)' }}>Amortization Schedule</h2>
-        <AmortizationTable schedule={summary.schedule} />
+        <div
+          style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', userSelect: 'none' }}
+          onClick={() => setIsAmortizationExpanded(!isAmortizationExpanded)}
+        >
+          <h2 style={{ marginBottom: isAmortizationExpanded ? 'var(--space-md)' : 0, transition: 'margin 0.3s ease' }}>Amortization Schedule</h2>
+          <div style={{ padding: '8px', background: 'rgba(0,0,0,0.2)', borderRadius: '50%', color: 'var(--accent-primary)' }}>
+            {isAmortizationExpanded ? <ChevronUp size={24} /> : <ChevronDown size={24} />}
+          </div>
+        </div>
+
+        {isAmortizationExpanded && (
+          <div style={{ animation: 'fadeIn 0.3s ease' }}>
+            <AmortizationTable schedule={summary.schedule} />
+          </div>
+        )}
       </div>
     </div>
   );

@@ -1,5 +1,5 @@
 import type { MortgageInput } from '../utils/mortgage';
-import { DollarSign, Percent, Calendar, PlusCircle } from 'lucide-react';
+import { DollarSign, Percent, Calendar } from 'lucide-react';
 
 interface CalculatorFormProps {
     input: MortgageInput;
@@ -68,59 +68,7 @@ export function CalculatorForm({ input, onChange }: CalculatorFormProps) {
                 </div>
             </div>
 
-            <h3 style={{ marginTop: 'var(--space-md)', borderTop: '1px solid var(--border-color)', paddingTop: 'var(--space-md)' }}>
-                <PlusCircle size={20} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '8px', color: 'var(--accent-primary)' }} />
-                Extra Payments
-            </h3>
 
-            <div className="input-group">
-                <label>Extra Monthly Payment</label>
-                <div className="input-wrapper">
-                    <DollarSign className="prefix" size={18} />
-                    <input
-                        type="number"
-                        className="has-prefix"
-                        value={input.extraMonthlyPayment || ''}
-                        onChange={(e) => handleChange('extraMonthlyPayment', Number(e.target.value))}
-                    />
-                </div>
-            </div>
-
-            <div className="input-group">
-                <label>Extra Yearly Payment</label>
-                <div className="input-wrapper">
-                    <DollarSign className="prefix" size={18} />
-                    <input
-                        type="number"
-                        className="has-prefix"
-                        value={input.extraYearlyPayment || ''}
-                        onChange={(e) => handleChange('extraYearlyPayment', Number(e.target.value))}
-                    />
-                </div>
-            </div>
-
-            <div className="flex gap-4">
-                <div className="input-group" style={{ flex: 2 }}>
-                    <label>One-time Payment Amount</label>
-                    <div className="input-wrapper">
-                        <DollarSign className="prefix" size={18} />
-                        <input
-                            type="number"
-                            className="has-prefix"
-                            value={input.oneTimePayment || ''}
-                            onChange={(e) => handleChange('oneTimePayment', Number(e.target.value))}
-                        />
-                    </div>
-                </div>
-                <div className="input-group" style={{ flex: 1 }}>
-                    <label>At Month</label>
-                    <input
-                        type="number"
-                        value={input.oneTimePaymentMonth || ''}
-                        onChange={(e) => handleChange('oneTimePaymentMonth', Number(e.target.value))}
-                    />
-                </div>
-            </div>
 
         </div>
     );
