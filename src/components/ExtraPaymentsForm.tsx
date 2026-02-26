@@ -99,7 +99,7 @@ export function ExtraPaymentsForm({ input, onChange, enabled, onToggleEnabled }:
                                             </div>
                                             <div className="text-muted" style={{ fontSize: '0.8rem' }}>
                                                 Starting {MONTHS.find(m => m.value === rule.startMonth)?.label} {rule.startYear}
-                                                {rule.endYear ? ` until ${MONTHS.find(m => m.value === rule.endMonth)?.label} ${rule.endYear}` : ''}
+                                                {rule.endYear ? ` until ${MONTHS.find(m => m.value === rule.endMonth)?.label} ${rule.endYear} (or payoff)` : ' until loan payoff'}
                                             </div>
                                         </div>
                                     </div>
@@ -176,22 +176,46 @@ export function ExtraPaymentsForm({ input, onChange, enabled, onToggleEnabled }:
                             {newRule.type !== 'one-time' && (
                                 <div className="input-group">
                                     <label>End Date (Optional)</label>
-                                    <div style={{ display: 'flex', gap: '8px' }}>
-                                        <select
-                                            style={{ flex: 1, padding: '0.75rem', background: 'rgba(0,0,0,0.2)', color: 'var(--text-main)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)' }}
-                                            value={newRule.endMonth || ''}
-                                            onChange={(e) => setNewRule({ ...newRule, endMonth: e.target.value ? Number(e.target.value) : undefined })}
-                                        >
-                                            <option value="">--</option>
-                                            {MONTHS.map(m => <option key={m.value} value={m.value}>{m.label}</option>)}
-                                        </select>
-                                        <input
-                                            type="number"
-                                            placeholder="YYYY"
-                                            style={{ flex: 1 }}
-                                            value={newRule.endYear || ''}
-                                            onChange={(e) => setNewRule({ ...newRule, endYear: e.target.value ? Number(e.target.value) : undefined })}
-                                        />
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.9rem' }}>
+                                            <input
+                                                type="radio"
+                                                name="endType"
+                                                checked={!newRule.endYear}
+                                                onChange={() => setNewRule({ ...newRule, endMonth: undefined, endYear: undefined })}
+                                                style={{ accentColor: 'var(--accent-primary)', width: '16px', height: '16px' }}
+                                            />
+                                            Until loan payoff
+                                        </label>
+                                        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.9rem' }}>
+                                            <input
+                                                type="radio"
+                                                name="endType"
+                                                checked={!!newRule.endYear}
+                                                onChange={() => setNewRule({ ...newRule, endMonth: newRule.startMonth, endYear: newRule.startYear || defaultYear })}
+                                                style={{ accentColor: 'var(--accent-primary)', width: '16px', height: '16px' }}
+                                            />
+                                            Custom date
+                                        </label>
+
+                                        {!!newRule.endYear && (
+                                            <div style={{ display: 'flex', gap: '8px', marginTop: '4px' }}>
+                                                <select
+                                                    style={{ flex: 1, padding: '0.75rem', background: 'rgba(0,0,0,0.2)', color: 'var(--text-main)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)' }}
+                                                    value={newRule.endMonth || ''}
+                                                    onChange={(e) => setNewRule({ ...newRule, endMonth: Number(e.target.value) })}
+                                                >
+                                                    {MONTHS.map(m => <option key={m.value} value={m.value}>{m.label}</option>)}
+                                                </select>
+                                                <input
+                                                    type="number"
+                                                    placeholder="YYYY"
+                                                    style={{ flex: 1 }}
+                                                    value={newRule.endYear || ''}
+                                                    onChange={(e) => setNewRule({ ...newRule, endYear: Number(e.target.value) })}
+                                                />
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             )}
