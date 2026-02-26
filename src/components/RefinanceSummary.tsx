@@ -9,6 +9,9 @@ export function RefinanceSummaryCard({ summary }: RefinanceSummaryCardProps) {
     const formatCurrency = (val: number) =>
         new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(val);
 
+    const formatDate = (date: Date) =>
+        new Intl.DateTimeFormat('en-US', { month: 'short', year: 'numeric' }).format(date);
+
     const isProfitable = summary.isProfitable;
     const mainColor = isProfitable ? 'var(--accent-primary)' : 'var(--color-danger)';
     const bgColor = isProfitable ? 'var(--bg-card-hover)' : 'rgba(239, 68, 68, 0.1)';
@@ -31,14 +34,30 @@ export function RefinanceSummaryCard({ summary }: RefinanceSummaryCardProps) {
                 </div>
             </div>
 
-            <div className="grid grid-cols-2" style={{ gap: 'var(--space-md)', marginTop: 'var(--space-lg)' }}>
+            <div className="grid grid-cols-3" style={{ gap: 'var(--space-md)', marginTop: 'var(--space-lg)' }}>
                 <div style={{ padding: 'var(--space-md)', background: 'rgba(0,0,0,0.2)', borderRadius: 'var(--radius-md)' }}>
-                    <div className="text-muted" style={{ fontSize: '0.85rem' }}>Old Remaining Interest</div>
+                    <div className="text-muted" style={{ fontSize: '0.85rem' }}>Interest Paid Before Refi</div>
                     <div style={{ fontSize: '1.25rem', fontWeight: 600 }}>
-                        {formatCurrency(summary.currentStandardRemainingInterest)}
+                        {formatCurrency(summary.interestPaidBeforeRefinance)}
                     </div>
                 </div>
 
+                <div style={{ padding: 'var(--space-md)', background: 'rgba(0,0,0,0.2)', borderRadius: 'var(--radius-md)' }}>
+                    <div className="text-muted" style={{ fontSize: '0.85rem' }}>Principal Paid Before Refi</div>
+                    <div style={{ fontSize: '1.25rem', fontWeight: 600 }}>
+                        {formatCurrency(summary.principalPaidBeforeRefinance)}
+                    </div>
+                </div>
+
+                <div style={{ padding: 'var(--space-md)', background: 'rgba(0,0,0,0.2)', borderRadius: 'var(--radius-md)' }}>
+                    <div className="text-muted" style={{ fontSize: '0.85rem' }}>New Loan Balance</div>
+                    <div style={{ fontSize: '1.25rem', fontWeight: 600 }}>
+                        {formatCurrency(summary.newLoanPrincipal)}
+                    </div>
+                </div>
+            </div>
+
+            <div className="grid grid-cols-3" style={{ gap: 'var(--space-md)', marginTop: 'var(--space-md)' }}>
                 <div style={{ padding: 'var(--space-md)', background: 'rgba(0,0,0,0.2)', borderRadius: 'var(--radius-md)' }}>
                     <div className="text-muted" style={{ fontSize: '0.85rem' }}>New Total Interest</div>
                     <div style={{ fontSize: '1.25rem', fontWeight: 600 }}>
@@ -47,21 +66,21 @@ export function RefinanceSummaryCard({ summary }: RefinanceSummaryCardProps) {
                 </div>
 
                 <div style={{ padding: 'var(--space-md)', background: 'rgba(0,0,0,0.2)', borderRadius: 'var(--radius-md)' }}>
-                    <div className="text-muted" style={{ fontSize: '0.85rem' }}>Old Remaining Balance</div>
-                    <div style={{ fontSize: '1.25rem', fontWeight: 600 }}>
-                        {formatCurrency(summary.remainingBalanceToRefinance)}
-                    </div>
-                </div>
-            </div>
-
-            <div className="grid grid-cols-3" style={{ gap: 'var(--space-md)', marginTop: 'var(--space-md)' }}>
-                <div style={{ padding: 'var(--space-md)', background: 'rgba(0,0,0,0.2)', borderRadius: 'var(--radius-md)' }}>
                     <div className="text-muted" style={{ fontSize: '0.85rem' }}>New Monthly Payment</div>
                     <div style={{ fontSize: '1.25rem', fontWeight: 600 }}>
                         {formatCurrency(summary.newMonthlyPayment)}
                     </div>
                 </div>
 
+                <div style={{ padding: 'var(--space-md)', background: 'rgba(0,0,0,0.2)', borderRadius: 'var(--radius-md)' }}>
+                    <div className="text-muted" style={{ fontSize: '0.85rem' }}>New Payoff Date</div>
+                    <div style={{ fontSize: '1.25rem', fontWeight: 600 }}>
+                        {formatDate(summary.newPayoffDate)}
+                    </div>
+                </div>
+            </div>
+
+            <div className="grid grid-cols-2" style={{ gap: 'var(--space-md)', marginTop: 'var(--space-md)' }}>
                 <div style={{ padding: 'var(--space-md)', background: 'rgba(0,0,0,0.2)', borderRadius: 'var(--radius-md)' }}>
                     <div className="text-muted" style={{ fontSize: '0.85rem' }}>Break-Even Point</div>
                     <div style={{ fontSize: '1.25rem', fontWeight: 600 }}>

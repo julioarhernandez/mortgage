@@ -223,9 +223,12 @@ export interface RefinanceInput {
 
 export interface RefinanceSummary {
     remainingBalanceToRefinance: number;
+    principalPaidBeforeRefinance: number;
+    interestPaidBeforeRefinance: number;
     newLoanPrincipal: number;
     newMonthlyPayment: number;
     newTotalInterest: number;
+    newPayoffDate: Date;
     currentStandardRemainingInterest: number;
     interestDifference: number;
     netSavings: number;
@@ -251,14 +254,19 @@ export function calculateRefinance(currentMortgage: MortgageInput, refinancePara
     // If refinanceMonth exceeds the loan term, the loan is already paid off.
     let remainingBalance = currentMortgage.principal;
     let currentInterestPaidUpToRefi = 0;
+    let refiStartDate = new Date();
 
     const targetRow = currentSummary.schedule.find(row => row.month === Math.max(1, refinanceMonth));
     if (targetRow) {
         remainingBalance = targetRow.remainingBalance;
         currentInterestPaidUpToRefi = targetRow.accumulatedInterest;
+        refiStartDate = targetRow.date;
     } else if (refinanceMonth > currentSummary.schedule.length && currentSummary.schedule.length > 0) {
         remainingBalance = 0;
+        refiStartDate = currentSummary.schedule[currentSummary.schedule.length - 1].date;
     }
+
+    const principalPaidBeforeRefinance = currentMortgage.principal - remainingBalance;
 
     // Determine the new loan principal
     const newLoanPrincipal = rollClosingCostsIntoLoan ? remainingBalance + closingCosts : remainingBalance;
@@ -316,11 +324,17 @@ export function calculateRefinance(currentMortgage: MortgageInput, refinancePara
         }
     }
 
+    const newPayoffDate = new Date(refiStartDate);
+    newPayoffDate.setMonth(newPayoffDate.getMonth() + newN);
+
     return {
         remainingBalanceToRefinance: remainingBalance,
+        principalPaidBeforeRefinance,
+        interestPaidBeforeRefinance: currentInterestPaidUpToRefi,
         newLoanPrincipal,
         newMonthlyPayment,
         newTotalInterest,
+        newPayoffDate,
         currentStandardRemainingInterest,
         interestDifference,
         netSavings,
