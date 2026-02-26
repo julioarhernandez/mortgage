@@ -1,6 +1,13 @@
 import type { RefinanceInput } from '../utils/mortgage';
 import { Percent, Calendar, DollarSign } from 'lucide-react';
 
+const MONTHS = [
+    { value: 1, label: 'Jan' }, { value: 2, label: 'Feb' }, { value: 3, label: 'Mar' },
+    { value: 4, label: 'Apr' }, { value: 5, label: 'May' }, { value: 6, label: 'Jun' },
+    { value: 7, label: 'Jul' }, { value: 8, label: 'Aug' }, { value: 9, label: 'Sep' },
+    { value: 10, label: 'Oct' }, { value: 11, label: 'Nov' }, { value: 12, label: 'Dec' }
+];
+
 interface RefinanceStrategyFormProps {
     refinanceForm: RefinanceInput;
     onChange: (input: RefinanceInput) => void;
@@ -38,14 +45,21 @@ export function RefinanceStrategyForm({ refinanceForm, onChange, enabled, onTogg
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-md)', animation: 'fadeIn 0.3s ease' }}>
                     <div className="flex gap-4">
                         <div className="input-group" style={{ flex: 1 }}>
-                            <label>Refinance at Month</label>
-                            <div className="input-wrapper">
-                                <Calendar className="prefix" size={18} />
+                            <label>Refinance Date</label>
+                            <div style={{ display: 'flex', gap: '8px' }}>
+                                <select
+                                    style={{ flex: 1, padding: '0.75rem', background: 'rgba(0,0,0,0.2)', color: 'var(--text-main)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)' }}
+                                    value={refinanceForm.refinanceMonthNum || new Date().getMonth() + 1}
+                                    onChange={(e) => handleChange('refinanceMonthNum', Number(e.target.value))}
+                                >
+                                    {MONTHS.map(m => <option key={m.value} value={m.value}>{m.label}</option>)}
+                                </select>
                                 <input
                                     type="number"
-                                    className="has-prefix"
-                                    value={refinanceForm.refinanceMonth || ''}
-                                    onChange={(e) => handleChange('refinanceMonth', Number(e.target.value))}
+                                    placeholder="YYYY"
+                                    style={{ flex: 1 }}
+                                    value={refinanceForm.refinanceYear || new Date().getFullYear()}
+                                    onChange={(e) => handleChange('refinanceYear', Number(e.target.value))}
                                 />
                             </div>
                         </div>

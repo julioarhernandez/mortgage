@@ -12,6 +12,8 @@ export interface MortgageInput {
     principal: number;
     annualInterestRate: number;
     years: number;
+    startMonth?: number;
+    startYear?: number;
     startDate?: Date; // Used to base the amortization calendar
     // Legacy / simple fields (used by programmatic strategies like arbitrage)
     extraMonthlyPayment?: number;
@@ -58,7 +60,7 @@ export function calculateMonthlyPayment(principal: number, annualInterestRate: n
 /**
  * Generates the full amortization schedule with optional extra payments.
  */
-export function calculateAmortization(input: MortgageInput, baseDate: Date = input.startDate || new Date()): MortgageSummary {
+export function calculateAmortization(input: MortgageInput, overrideBaseDate?: Date): MortgageSummary {
     const {
         principal,
         annualInterestRate,
@@ -69,13 +71,20 @@ export function calculateAmortization(input: MortgageInput, baseDate: Date = inp
         oneTimePaymentMonth = 0
     } = input;
 
+    let accumulatedInterest = 0;
+    const schedule: AmortizationRow[] = [];
+    let month = 1;
+
+    // Calculate base date
+    const fallbackDate = new Date();
+    const startYear = input.startYear || fallbackDate.getFullYear();
+    const startMonth = input.startMonth || fallbackDate.getMonth() + 1;
+    const baseDate = overrideBaseDate || input.startDate || new Date(startYear, startMonth - 1, 1);
+
     const standardMonthlyPayment = calculateMonthlyPayment(principal, annualInterestRate, years);
     const r = annualInterestRate / 100 / 12;
 
     let balance = principal;
-    let accumulatedInterest = 0;
-    const schedule: AmortizationRow[] = [];
-    let month = 1;
 
     // Let's also calculate what the base metrics WOULD be to compare savings
     let standardBalance = principal;
@@ -107,7 +116,7 @@ export function calculateAmortization(input: MortgageInput, baseDate: Date = inp
 
         // Determine the date for this month
         const date = new Date(baseDate);
-        date.setMonth(date.getMonth() + month);
+        date.setMonth(date.getMonth() + month - 1); // zero-indexed from baseDate month, wait, month in loop starts at 1, so month 1 is the first payment (baseDate + 1 month? Or is baseDate the first payment? Usually first payment is 1 month after start date, but for simplicity let's say month 1 is the start date. Let's make it date.getMonth() + month - 1 so month 1 is baseDate).
         const currentYear = date.getFullYear();
         const currentMonthNum = date.getMonth() + 1; // 1-12
 
@@ -255,7 +264,9 @@ export function calculateArbitrage(mortgageInput: MortgageInput, externalLoan: E
 }
 
 export interface RefinanceInput {
-    refinanceMonth: number;
+    refinanceMonthNum?: number; // 1-12
+    refinanceYear?: number;
+    refinanceMonth?: number; // legacy/programmatic offset
     newAnnualRate: number;
     newTermYears: number;
     closingCosts: number;
@@ -286,10 +297,21 @@ export interface RefinanceSummary {
  * originating a new loan, and comparing the remaining costs.
  */
 export function calculateRefinance(currentMortgage: MortgageInput, refinanceParams: RefinanceInput): RefinanceSummary {
-    const { refinanceMonth, newAnnualRate, newTermYears, closingCosts, rollClosingCostsIntoLoan } = refinanceParams;
+    const { newAnnualRate, newTermYears, closingCosts, rollClosingCostsIntoLoan } = refinanceParams;
 
     // Get the amortization schedule of the current mortgage
     const currentSummary = calculateAmortization(currentMortgage);
+
+    // Determine the refinance month index
+    let refinanceMonthIndex = refinanceParams.refinanceMonth || 1;
+
+    if (refinanceParams.refinanceYear && refinanceParams.refinanceMonthNum) {
+        const startYearNum = currentMortgage.startYear || new Date().getFullYear();
+        const startMonthNum = currentMortgage.startMonth || new Date().getMonth() + 1;
+        const baseDate = new Date(startYearNum, startMonthNum - 1, 1);
+        const refiDate = new Date(refinanceParams.refinanceYear, refinanceParams.refinanceMonthNum - 1, 1);
+        refinanceMonthIndex = (refiDate.getFullYear() - baseDate.getFullYear()) * 12 + (refiDate.getMonth() - baseDate.getMonth()) + 1;
+    }
 
     // Find the remaining balance at the time of refinance
     // If refinanceMonth is 0 or 1, we start from the beginning.
@@ -298,12 +320,12 @@ export function calculateRefinance(currentMortgage: MortgageInput, refinancePara
     let currentInterestPaidUpToRefi = 0;
     let refiStartDate = new Date();
 
-    const targetRow = currentSummary.schedule.find(row => row.month === Math.max(1, refinanceMonth));
+    const targetRow = currentSummary.schedule.find(row => row.month === Math.max(1, refinanceMonthIndex));
     if (targetRow) {
         remainingBalance = targetRow.remainingBalance;
         currentInterestPaidUpToRefi = targetRow.accumulatedInterest;
         refiStartDate = targetRow.date;
-    } else if (refinanceMonth > currentSummary.schedule.length && currentSummary.schedule.length > 0) {
+    } else if (refinanceMonthIndex > currentSummary.schedule.length && currentSummary.schedule.length > 0) {
         remainingBalance = 0;
         refiStartDate = currentSummary.schedule[currentSummary.schedule.length - 1].date;
     }
@@ -354,7 +376,7 @@ export function calculateRefinance(currentMortgage: MortgageInput, refinancePara
     const netSavings = oldRemainingCost - newRemainingCost;
 
     // Current months remaining
-    const currentMonthsRemaining = currentSummary.schedule.length - Math.max(1, refinanceMonth) + 1;
+    const currentMonthsRemaining = currentSummary.schedule.length - Math.max(1, refinanceMonthIndex) + 1;
 
     // Break-even month: How many months until accumulated savings from monthly payment covers closing costs?
     let breakEvenMonth = null;

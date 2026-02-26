@@ -31,7 +31,8 @@ function App() {
   });
 
   const [refinanceForm, setRefinanceForm] = useState<RefinanceInput>({
-    refinanceMonth: 12,
+    refinanceMonthNum: new Date().getMonth() + 1,
+    refinanceYear: new Date().getFullYear() + 2,
     newAnnualRate: 4.5,
     newTermYears: 30,
     closingCosts: 5000,
