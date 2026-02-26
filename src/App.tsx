@@ -39,13 +39,8 @@ function App() {
   const [activeStrategy, setActiveStrategy] = useState<'none' | 'arbitrage' | 'refinance'>('none');
 
   const summary = useMemo(() => {
-    const activeInput = { ...input };
-    if (activeStrategy === 'arbitrage') {
-      activeInput.oneTimePayment = (activeInput.oneTimePayment || 0) + externalLoan.amount;
-      activeInput.oneTimePaymentMonth = 1; // Assuming injected at month 1
-    }
-    return calculateAmortization(activeInput);
-  }, [input, activeStrategy, externalLoan]);
+    return calculateAmortization(input);
+  }, [input]);
 
   const arbitrage = useMemo(() => {
     if (activeStrategy !== 'arbitrage') return null;
