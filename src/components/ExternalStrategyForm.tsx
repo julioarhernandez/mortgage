@@ -35,7 +35,9 @@ export function ExternalStrategyForm({ externalLoan, onChange, enabled, onToggle
             </p>
 
             {enabled && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-md)', animation: 'fadeIn 0.3s ease' }}>
+                <div className="grid grid-cols-2" style={{ gap: 'var(--space-md)', animation: 'fadeIn 0.3s ease' }}>
+
+                    {/* Amount */}
                     <div className="input-group">
                         <label>External Loan Amount</label>
                         <div className="input-wrapper">
@@ -47,54 +49,50 @@ export function ExternalStrategyForm({ externalLoan, onChange, enabled, onToggle
                                 onChange={(e) => handleChange('amount', Number(e.target.value))}
                             />
                         </div>
-                        <input
-                            type="range"
-                            min="5000" max="250000" step="5000"
-                            value={externalLoan.amount}
-                            onChange={(e) => handleChange('amount', Number(e.target.value))}
-                        />
                     </div>
 
-                    <div className="flex gap-4">
-                        <div className="input-group" style={{ flex: 1 }}>
-                            <label>External Interest Rate</label>
-                            <div className="input-wrapper">
-                                <Percent className="prefix" size={18} />
-                                <input
-                                    type="number"
-                                    className="has-prefix"
-                                    step="0.1"
-                                    value={externalLoan.annualRate || ''}
-                                    onChange={(e) => handleChange('annualRate', Number(e.target.value))}
-                                />
-                            </div>
-                        </div>
-
-                        <div className="input-group" style={{ flex: 1 }}>
-                            <label>External Term (Months)</label>
-                            <div className="input-wrapper">
-                                <Calendar className="prefix" size={18} />
-                                <input
-                                    type="number"
-                                    className="has-prefix"
-                                    value={externalLoan.termMonths || ''}
-                                    onChange={(e) => handleChange('termMonths', Number(e.target.value))}
-                                />
-                            </div>
-                        </div>
-                    </div>
-
+                    {/* Rate */}
                     <div className="input-group">
-                        <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', gap: '8px', color: 'var(--text-main)' }}>
+                        <label>External Interest Rate</label>
+                        <div className="input-wrapper">
+                            <Percent className="prefix" size={18} />
+                            <input
+                                type="number"
+                                className="has-prefix"
+                                step="0.1"
+                                value={externalLoan.annualRate || ''}
+                                onChange={(e) => handleChange('annualRate', Number(e.target.value))}
+                            />
+                        </div>
+                    </div>
+
+                    {/* Term */}
+                    <div className="input-group">
+                        <label>External Term (Months)</label>
+                        <div className="input-wrapper">
+                            <Calendar className="prefix" size={18} />
+                            <input
+                                type="number"
+                                className="has-prefix"
+                                value={externalLoan.termMonths || ''}
+                                onChange={(e) => handleChange('termMonths', Number(e.target.value))}
+                            />
+                        </div>
+                    </div>
+
+                    {/* Checkbox (Interest Only) */}
+                    <div className="input-group" style={{ justifyContent: 'center' }}>
+                        <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', gap: '8px', color: 'var(--text-main)', marginTop: '24px' }}>
                             <input
                                 type="checkbox"
                                 checked={externalLoan.isInterestOnly || false}
                                 onChange={(e) => handleChange('isInterestOnly', e.target.checked as any)}
                                 style={{ width: '18px', height: '18px', accentColor: 'var(--accent-primary)' }}
                             />
-                            <span>Calculate as Interest-Only HELOC (Principal paid at end of term)</span>
+                            <span style={{ fontSize: '0.85rem' }}>Interest-Only HELOC (Pay at end)</span>
                         </label>
                     </div>
+
                 </div>
             )}
         </div>

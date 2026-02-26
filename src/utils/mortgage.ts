@@ -157,6 +157,7 @@ export interface ArbitrageSummary {
     baselinePayoffMonths: number;
     monthsSaved: number;
     isProfitable: boolean;
+    newTotalPayment: number;
 }
 
 /**
@@ -209,7 +210,8 @@ export function calculateArbitrage(mortgageInput: MortgageInput, externalLoan: E
         newPayoffMonths: newMortgageSummary.totalMonths,
         baselinePayoffMonths: baselineSummary.totalMonths,
         monthsSaved: baselineSummary.totalMonths - newMortgageSummary.totalMonths,
-        isProfitable: netSavings > 0
+        isProfitable: netSavings > 0,
+        newTotalPayment: newMortgageSummary.totalPayment + externalTotalInterest
     };
 }
 
@@ -237,6 +239,7 @@ export interface RefinanceSummary {
     monthsSaved: number;
     isProfitable: boolean;
     breakEvenMonth: number | null;
+    newTotalPayment: number;
 }
 
 /**
@@ -342,6 +345,7 @@ export function calculateRefinance(currentMortgage: MortgageInput, refinancePara
         newTermMonths: newN,
         monthsSaved: currentMonthsRemaining - newN,
         isProfitable: netSavings > 0,
-        breakEvenMonth
+        breakEvenMonth,
+        newTotalPayment: principalPaidBeforeRefinance + currentInterestPaidUpToRefi + newRemainingCost
     };
 }

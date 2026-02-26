@@ -31,7 +31,7 @@ export function ArbitrageSummaryCard({ arbitrage }: ArbitrageSummaryProps) {
                 </div>
             </div>
 
-            <div className="grid grid-cols-3" style={{ gap: 'var(--space-md)', marginTop: 'var(--space-lg)' }}>
+            <div className="grid grid-cols-2" style={{ gap: 'var(--space-md)', marginTop: 'var(--space-lg)' }}>
                 <div style={{ padding: 'var(--space-md)', background: 'rgba(0,0,0,0.2)', borderRadius: 'var(--radius-md)' }}>
                     <div className="text-muted" style={{ fontSize: '0.85rem' }}>Mortgage Interest Saved</div>
                     <div style={{ fontSize: '1.25rem', fontWeight: 600, color: 'var(--accent-primary)' }}>
@@ -46,6 +46,13 @@ export function ArbitrageSummaryCard({ arbitrage }: ArbitrageSummaryProps) {
                     </div>
                     <div className="text-muted" style={{ fontSize: '0.75rem' }}>
                         ({formatCurrency(arbitrage.externalMonthlyPayment)}/mo)
+                    </div>
+                </div>
+
+                <div style={{ padding: 'var(--space-md)', background: 'rgba(0,0,0,0.2)', borderRadius: 'var(--radius-md)' }}>
+                    <div className="text-muted" style={{ fontSize: '0.85rem' }}>Total Cost (All-In)</div>
+                    <div style={{ fontSize: '1.25rem', fontWeight: 600 }}>
+                        {formatCurrency(arbitrage.newTotalPayment)}
                     </div>
                 </div>
 

@@ -48,14 +48,14 @@ export function SummaryCards({ summary }: SummaryCardsProps) {
                 </div>
             </div>
 
-            {/* Savings Card (if extra payments) */}
+            {/* Savings Card (always shown) */}
             <div className="glass-panel" style={{ padding: 'var(--space-lg)', display: 'flex', alignItems: 'center', gap: 'var(--space-md)', borderColor: summary.interestSaved > 0 ? 'var(--accent-primary)' : 'var(--border-color)', background: summary.interestSaved > 0 ? 'var(--bg-card-hover)' : 'var(--bg-card)' }}>
-                <div style={{ padding: '12px', background: 'var(--accent-glow)', borderRadius: '50%' }}>
+                <div style={{ padding: '12px', background: summary.interestSaved > 0 ? 'var(--accent-glow)' : 'rgba(255,255,255,0.05)', borderRadius: '50%' }}>
                     {summary.interestSaved > 0 ? <ArrowDownRight size={24} color="var(--accent-primary)" /> : <Clock size={24} className="text-muted" />}
                 </div>
                 <div>
                     <h3 className="text-muted" style={{ fontSize: '0.9rem', fontWeight: 500 }}>Interest Saved</h3>
-                    <div style={{ fontSize: '1.25rem', fontWeight: 600, color: summary.interestSaved > 0 ? 'var(--accent-primary)' : 'inherit' }}>
+                    <div style={{ fontSize: '1.25rem', fontWeight: 600, color: summary.interestSaved > 0 ? 'var(--accent-primary)' : 'var(--text-main)' }}>
                         {formatCurrency(summary.interestSaved)}
                     </div>
                     {summary.monthsSaved > 0 && (
@@ -63,6 +63,14 @@ export function SummaryCards({ summary }: SummaryCardsProps) {
                             {Math.floor(summary.monthsSaved / 12)}y {summary.monthsSaved % 12}m earlier
                         </div>
                     )}
+                </div>
+            </div>
+
+            {/* Total Cost Card */}
+            <div className="glass-panel" style={{ gridColumn: '1 / -1', padding: 'var(--space-lg)', position: 'relative', overflow: 'hidden', textAlign: 'center', background: 'var(--bg-card-hover)', borderColor: 'var(--accent-primary)' }}>
+                <h3 className="text-muted" style={{ fontSize: '1.1rem', fontWeight: 500 }}>Total Cost (All-In)</h3>
+                <div className="text-value text-gradient" style={{ marginTop: 'var(--space-sm)' }}>
+                    {formatCurrency(summary.totalPayment)}
                 </div>
             </div>
 
