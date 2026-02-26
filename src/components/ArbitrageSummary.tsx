@@ -1,5 +1,5 @@
 import type { ArbitrageSummary } from '../utils/mortgage';
-import { CheckCircle, XCircle } from 'lucide-react';
+import { CheckCircle, XCircle, Info } from 'lucide-react';
 
 interface ArbitrageSummaryProps {
     arbitrage: ArbitrageSummary;
@@ -50,7 +50,12 @@ export function ArbitrageSummaryCard({ arbitrage }: ArbitrageSummaryProps) {
                 </div>
 
                 <div style={{ padding: 'var(--space-md)', background: 'rgba(0,0,0,0.3)', border: `1px solid ${mainColor}`, borderRadius: 'var(--radius-md)' }}>
-                    <div className="text-muted" style={{ fontSize: '0.9rem', fontWeight: 500 }}>Net Financial Impact</div>
+                    <div className="text-muted" style={{ fontSize: '0.9rem', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        Net Financial Impact
+                        <span title="Calculated as: (Mortgage Interest Saved) - (External Loan Cost)">
+                            <Info size={14} style={{ cursor: 'help' }} />
+                        </span>
+                    </div>
                     <div style={{ fontSize: '1.75rem', fontWeight: 700, color: mainColor }}>
                         {isProfitable ? '+' : ''}{formatCurrency(arbitrage.netSavings)}
                     </div>

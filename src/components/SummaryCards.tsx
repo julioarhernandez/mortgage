@@ -42,7 +42,9 @@ export function SummaryCards({ summary }: SummaryCardsProps) {
                 <div>
                     <h3 className="text-muted" style={{ fontSize: '0.9rem', fontWeight: 500 }}>Payoff Date</h3>
                     <div style={{ fontSize: '1.25rem', fontWeight: 600 }}>{formatDate(summary.payoffDate)}</div>
-                    <div className="text-muted" style={{ fontSize: '0.8rem' }}>({summary.totalMonths} months)</div>
+                    <div className="text-muted" style={{ fontSize: '0.8rem' }}>
+                        ({Math.floor(summary.totalMonths / 12)}y {summary.totalMonths % 12}m)
+                    </div>
                 </div>
             </div>
 
