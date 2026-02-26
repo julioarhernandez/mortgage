@@ -212,3 +212,122 @@ export function calculateArbitrage(mortgageInput: MortgageInput, externalLoan: E
         isProfitable: netSavings > 0
     };
 }
+
+export interface RefinanceInput {
+    refinanceMonth: number;
+    newAnnualRate: number;
+    newTermYears: number;
+    closingCosts: number;
+    rollClosingCostsIntoLoan: boolean;
+}
+
+export interface RefinanceSummary {
+    remainingBalanceToRefinance: number;
+    newLoanPrincipal: number;
+    newMonthlyPayment: number;
+    newTotalInterest: number;
+    currentStandardRemainingInterest: number;
+    interestDifference: number;
+    netSavings: number;
+    currentMonthsRemaining: number;
+    newTermMonths: number;
+    monthsSaved: number;
+    isProfitable: boolean;
+    breakEvenMonth: number | null;
+}
+
+/**
+ * Evaluates a refinance strategy by taking a snapshot of the current loan at `refinanceMonth`,
+ * originating a new loan, and comparing the remaining costs.
+ */
+export function calculateRefinance(currentMortgage: MortgageInput, refinanceParams: RefinanceInput): RefinanceSummary {
+    const { refinanceMonth, newAnnualRate, newTermYears, closingCosts, rollClosingCostsIntoLoan } = refinanceParams;
+
+    // Get the amortization schedule of the current mortgage
+    const currentSummary = calculateAmortization(currentMortgage);
+
+    // Find the remaining balance at the time of refinance
+    // If refinanceMonth is 0 or 1, we start from the beginning.
+    // If refinanceMonth exceeds the loan term, the loan is already paid off.
+    let remainingBalance = currentMortgage.principal;
+    let currentInterestPaidUpToRefi = 0;
+
+    const targetRow = currentSummary.schedule.find(row => row.month === Math.max(1, refinanceMonth));
+    if (targetRow) {
+        remainingBalance = targetRow.remainingBalance;
+        currentInterestPaidUpToRefi = targetRow.accumulatedInterest;
+    } else if (refinanceMonth > currentSummary.schedule.length && currentSummary.schedule.length > 0) {
+        remainingBalance = 0;
+    }
+
+    // Determine the new loan principal
+    const newLoanPrincipal = rollClosingCostsIntoLoan ? remainingBalance + closingCosts : remainingBalance;
+
+    // Calculate new loan
+    const newMonthlyPayment = calculateMonthlyPayment(newLoanPrincipal, newAnnualRate, newTermYears);
+    const newN = newTermYears * 12;
+
+    let newTotalInterest = 0;
+    // Calculate new loan interest
+    let tempBalance = newLoanPrincipal;
+    const newR = newAnnualRate / 100 / 12;
+    for (let i = 0; i < newN; i++) {
+        if (tempBalance <= 0) break;
+        const interestPmt = tempBalance * newR;
+        const principalPmt = newMonthlyPayment - interestPmt;
+        newTotalInterest += interestPmt;
+        tempBalance -= principalPmt;
+    }
+
+    // Calculate remaining current interest if we didn't refinance
+    // Assuming no extra payments are made after the refinance date in the baseline
+    // The truest baseline is to see what the remaining interest is based on the current summary
+    const currentStandardRemainingInterest = currentSummary.totalInterest - currentInterestPaidUpToRefi;
+
+    // Interest difference
+    const interestDifference = currentStandardRemainingInterest - newTotalInterest;
+
+    // Net savings accounts for out-of-pocket or rolled-in closing costs.
+    // If rolled in, they are in the newTotalInterest automatically (via the higher principal). 
+    // Wait, if rolled in, we pay them via principal. 
+    // Remaining cost of old mortgage = remainingBalance + currentStandardRemainingInterest
+    // Total cost of new mortgage = newLoanPrincipal + newTotalInterest 
+    // Cost of new mortgage includes closing costs if rolled in. If paid upfront, total cost is remainingBalance + newTotalInterest + closingCosts.
+    // So in terms of out of pocket cash for the remaining term:
+    // Old out of pocket = remainingBalance + currentStandardRemainingInterest
+    // New out of pocket = newLoanPrincipal + newTotalInterest + (rollClosingCostsIntoLoan ? 0 : closingCosts)
+    // Savings = Old - New
+    const oldRemainingCost = remainingBalance + currentStandardRemainingInterest;
+    const upfrontCost = rollClosingCostsIntoLoan ? 0 : closingCosts;
+    const newRemainingCost = newLoanPrincipal + newTotalInterest + upfrontCost;
+
+    const netSavings = oldRemainingCost - newRemainingCost;
+
+    // Current months remaining
+    const currentMonthsRemaining = currentSummary.schedule.length - Math.max(1, refinanceMonth) + 1;
+
+    // Break-even month: How many months until accumulated savings from monthly payment covers closing costs?
+    let breakEvenMonth = null;
+    const monthlySavings = currentSummary.monthlyPayment - newMonthlyPayment;
+    if (monthlySavings > 0) {
+        breakEvenMonth = Math.ceil(closingCosts / monthlySavings);
+        if (breakEvenMonth > newN) {
+            breakEvenMonth = null; // Doesn't break even within the loan term from cashflow alone
+        }
+    }
+
+    return {
+        remainingBalanceToRefinance: remainingBalance,
+        newLoanPrincipal,
+        newMonthlyPayment,
+        newTotalInterest,
+        currentStandardRemainingInterest,
+        interestDifference,
+        netSavings,
+        currentMonthsRemaining: Math.max(0, currentMonthsRemaining),
+        newTermMonths: newN,
+        monthsSaved: currentMonthsRemaining - newN,
+        isProfitable: netSavings > 0,
+        breakEvenMonth
+    };
+}

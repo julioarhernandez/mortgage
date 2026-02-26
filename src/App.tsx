@@ -1,11 +1,13 @@
 import { useState, useMemo } from 'react';
-import { calculateAmortization, calculateArbitrage, type MortgageInput, type ExternalLoanInput } from './utils/mortgage';
+import { calculateAmortization, calculateArbitrage, calculateRefinance, type MortgageInput, type ExternalLoanInput, type RefinanceInput } from './utils/mortgage';
 import { CalculatorForm } from './components/CalculatorForm';
 import { SummaryCards } from './components/SummaryCards';
 import { AmortizationChart } from './components/AmortizationChart';
 import { AmortizationTable } from './components/AmortizationTable';
 import { ExternalStrategyForm } from './components/ExternalStrategyForm';
 import { ArbitrageSummaryCard } from './components/ArbitrageSummary';
+import { RefinanceStrategyForm } from './components/RefinanceStrategyForm';
+import { RefinanceSummaryCard } from './components/RefinanceSummary';
 import './index.css';
 
 function App() {
@@ -22,23 +24,38 @@ function App() {
   const [externalLoan, setExternalLoan] = useState<ExternalLoanInput>({
     amount: 50000,
     annualRate: 7.5,
-    termMonths: 60
+    termMonths: 60,
+    isInterestOnly: false
   });
-  const [enableStrategy, setEnableStrategy] = useState(false);
+
+  const [refinanceForm, setRefinanceForm] = useState<RefinanceInput>({
+    refinanceMonth: 12,
+    newAnnualRate: 4.5,
+    newTermYears: 30,
+    closingCosts: 5000,
+    rollClosingCostsIntoLoan: true
+  });
+
+  const [activeStrategy, setActiveStrategy] = useState<'none' | 'arbitrage' | 'refinance'>('none');
 
   const summary = useMemo(() => {
     const activeInput = { ...input };
-    if (enableStrategy) {
+    if (activeStrategy === 'arbitrage') {
       activeInput.oneTimePayment = (activeInput.oneTimePayment || 0) + externalLoan.amount;
       activeInput.oneTimePaymentMonth = 1; // Assuming injected at month 1
     }
     return calculateAmortization(activeInput);
-  }, [input, enableStrategy, externalLoan]);
+  }, [input, activeStrategy, externalLoan]);
 
   const arbitrage = useMemo(() => {
-    if (!enableStrategy) return null;
+    if (activeStrategy !== 'arbitrage') return null;
     return calculateArbitrage(input, externalLoan);
-  }, [input, externalLoan, enableStrategy]);
+  }, [input, externalLoan, activeStrategy]);
+
+  const refinanceSummary = useMemo(() => {
+    if (activeStrategy !== 'refinance') return null;
+    return calculateRefinance(input, refinanceForm);
+  }, [input, refinanceForm, activeStrategy]);
 
   return (
     <div className="container">
@@ -51,13 +68,19 @@ function App() {
 
       <div className="grid grid-cols-3">
         {/* Left Column: Form */}
-        <div style={{ gridColumn: '1 / 2' }}>
+        <div style={{ gridColumn: '1 / 2', display: 'flex', flexDirection: 'column', gap: 'var(--space-lg)' }}>
           <CalculatorForm input={input} onChange={setInput} />
           <ExternalStrategyForm
             externalLoan={externalLoan}
             onChange={setExternalLoan}
-            enabled={enableStrategy}
-            onToggleEnabled={setEnableStrategy}
+            enabled={activeStrategy === 'arbitrage'}
+            onToggleEnabled={(enabled) => setActiveStrategy(enabled ? 'arbitrage' : 'none')}
+          />
+          <RefinanceStrategyForm
+            refinanceForm={refinanceForm}
+            onChange={setRefinanceForm}
+            enabled={activeStrategy === 'refinance'}
+            onToggleEnabled={(enabled) => setActiveStrategy(enabled ? 'refinance' : 'none')}
           />
         </div>
 
@@ -65,6 +88,7 @@ function App() {
         <div style={{ gridColumn: '2 / 4', display: 'flex', flexDirection: 'column', gap: 'var(--space-lg)' }}>
           <SummaryCards summary={summary} />
           {arbitrage && <ArbitrageSummaryCard arbitrage={arbitrage} />}
+          {refinanceSummary && <RefinanceSummaryCard summary={refinanceSummary} />}
 
           <div className="glass-panel" style={{ padding: 'var(--space-lg)' }}>
             <h2 style={{ marginBottom: 'var(--space-md)' }}>Principal vs Interest</h2>
