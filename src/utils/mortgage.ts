@@ -1,11 +1,25 @@
+export interface PaymentRule {
+    id: string;
+    type: 'monthly' | 'yearly' | 'one-time';
+    amount: number;
+    startMonth: number; // 1-12 (1 = Jan, 12 = Dec)
+    startYear: number;
+    endMonth?: number; // 1-12
+    endYear?: number;
+}
+
 export interface MortgageInput {
     principal: number;
     annualInterestRate: number;
     years: number;
+    startDate?: Date; // Used to base the amortization calendar
+    // Legacy / simple fields (used by programmatic strategies like arbitrage)
     extraMonthlyPayment?: number;
     extraYearlyPayment?: number;
     oneTimePayment?: number;
     oneTimePaymentMonth?: number;
+    // Dynamic schedules
+    paymentSchedule?: PaymentRule[];
 }
 
 export interface AmortizationRow {
@@ -44,7 +58,7 @@ export function calculateMonthlyPayment(principal: number, annualInterestRate: n
 /**
  * Generates the full amortization schedule with optional extra payments.
  */
-export function calculateAmortization(input: MortgageInput, baseDate: Date = new Date()): MortgageSummary {
+export function calculateAmortization(input: MortgageInput, baseDate: Date = input.startDate || new Date()): MortgageSummary {
     const {
         principal,
         annualInterestRate,
@@ -91,6 +105,35 @@ export function calculateAmortization(input: MortgageInput, baseDate: Date = new
             extraPaymentThisMonth += oneTimePayment;
         }
 
+        // Determine the date for this month
+        const date = new Date(baseDate);
+        date.setMonth(date.getMonth() + month);
+        const currentYear = date.getFullYear();
+        const currentMonthNum = date.getMonth() + 1; // 1-12
+
+        // Evaluate dynamic schedule rules
+        if (input.paymentSchedule) {
+            for (const rule of input.paymentSchedule) {
+                const isAfterStart = currentYear > rule.startYear || (currentYear === rule.startYear && currentMonthNum >= rule.startMonth);
+
+                let isBeforeEnd = true;
+                if (rule.endYear && rule.endMonth) {
+                    isBeforeEnd = currentYear < rule.endYear || (currentYear === rule.endYear && currentMonthNum <= rule.endMonth);
+                }
+
+                if (isAfterStart && isBeforeEnd) {
+                    if (rule.type === 'monthly') {
+                        extraPaymentThisMonth += rule.amount;
+                    } else if (rule.type === 'yearly' && currentMonthNum === rule.startMonth) {
+                        // Yearly payments occur on the same month as the start month
+                        extraPaymentThisMonth += rule.amount;
+                    } else if (rule.type === 'one-time' && currentYear === rule.startYear && currentMonthNum === rule.startMonth) {
+                        extraPaymentThisMonth += rule.amount;
+                    }
+                }
+            }
+        }
+
         let totalPrincipalPayment = requiredPrincipal + extraPaymentThisMonth;
 
         // Check if we are overpaying the balance
@@ -106,10 +149,6 @@ export function calculateAmortization(input: MortgageInput, baseDate: Date = new
         const totalPayment = interestPayment + totalPrincipalPayment;
         balance -= totalPrincipalPayment;
         accumulatedInterest += interestPayment;
-
-        // Determine the date
-        const date = new Date(baseDate);
-        date.setMonth(date.getMonth() + month);
 
         schedule.push({
             month,

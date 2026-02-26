@@ -46,8 +46,7 @@ function App() {
   const summary = useMemo(() => {
     const activeInput = { ...input };
     if (!extraPaymentsEnabled) {
-      activeInput.extraMonthlyPayment = 0;
-      activeInput.extraYearlyPayment = 0;
+      activeInput.paymentSchedule = [];
       activeInput.oneTimePayment = activeStrategy === 'arbitrage' ? externalLoan.amount : 0;
     } else if (activeStrategy === 'arbitrage') {
       activeInput.oneTimePayment = (activeInput.oneTimePayment || 0) + externalLoan.amount;
