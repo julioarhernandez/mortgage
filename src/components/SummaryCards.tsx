@@ -67,7 +67,7 @@ export function SummaryCards({ summary }: SummaryCardsProps) {
             </div>
 
             {/* Total Cost Card */}
-            <div className="glass-panel" style={{ gridColumn: '1 / -1', padding: 'var(--space-lg)', position: 'relative', overflow: 'hidden', textAlign: 'center', background: 'var(--bg-card-hover)', borderColor: 'var(--accent-primary)' }}>
+            <div className="glass-panel" style={{ gridColumn: '1 / -1', padding: 'var(--space-lg)', position: 'relative', overflow: 'hidden', textAlign: 'center', background: 'var(--bg-card-hover)', borderColor: 'var(--accent-secondary)' }}>
                 <h3 className="text-muted" style={{ fontSize: '1.1rem', fontWeight: 500 }}>Total Cost (All-In)</h3>
                 <div className="text-value text-gradient" style={{ marginTop: 'var(--space-sm)' }}>
                     {formatCurrency(summary.totalPayment)}
