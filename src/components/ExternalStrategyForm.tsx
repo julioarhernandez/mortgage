@@ -1,5 +1,6 @@
-import type { ExternalLoanInput } from '../utils/mortgage';
-import { DollarSign, Percent, Calendar, Info } from 'lucide-react';
+import { useState } from 'react';
+import type { ExternalLoanInput, ExternalPaymentRule } from '../utils/mortgage';
+import { DollarSign, Percent, Calendar, Info, Plus, Trash2, ChevronDown, ChevronRight } from 'lucide-react';
 import { Tooltip } from './Tooltip';
 
 const MONTHS = [
@@ -17,9 +18,67 @@ interface ExternalStrategyFormProps {
 }
 
 export function ExternalStrategyForm({ externalLoan, onChange, enabled, onToggleEnabled }: ExternalStrategyFormProps) {
-    const handleChange = (field: keyof ExternalLoanInput, value: number) => {
+    const [isExpanded, setIsExpanded] = useState(false);
+    const [isAdding, setIsAdding] = useState(false);
+    const [activePhase, setActivePhase] = useState<'draw' | 'repay'>('draw');
+
+    const [newRule, setNewRule] = useState<Partial<ExternalPaymentRule>>({
+        type: 'monthly',
+        amount: 100,
+        startMonth: 1,
+        durationMonths: 0 // 0 means until end
+    });
+
+    const handleChange = (field: keyof ExternalLoanInput, value: any) => {
         onChange({ ...externalLoan, [field]: value });
     };
+
+    const handleAddRule = () => {
+        if (!newRule.amount) return;
+        const rule: ExternalPaymentRule = {
+            id: Math.random().toString(36).substring(7),
+            type: newRule.type as any,
+            amount: newRule.amount,
+            startMonth: newRule.startMonth || 1,
+            durationMonths: newRule.durationMonths || 0
+        };
+
+        const field = activePhase === 'draw' ? 'drawPaymentSchedule' : 'repayPaymentSchedule';
+        const currentRules = (externalLoan[field] || []) as ExternalPaymentRule[];
+
+        handleChange(field, [...currentRules, rule]);
+        setIsAdding(false);
+    };
+
+    const handleRemoveRule = (phase: 'draw' | 'repay', id: string) => {
+        const field = phase === 'draw' ? 'drawPaymentSchedule' : 'repayPaymentSchedule';
+        const currentRules = (externalLoan[field] || []) as ExternalPaymentRule[];
+        handleChange(field, currentRules.filter(r => r.id !== id));
+    };
+
+    const formatCurrency = (val: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(val);
+
+    const renderRulesList = (rules: ExternalPaymentRule[], phase: 'draw' | 'repay') => (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            {rules.map(rule => (
+                <div key={rule.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.05)', padding: '10px 14px', borderRadius: 'var(--radius-sm)', border: '1px solid rgba(255,255,255,0.1)' }}>
+                    <div style={{ fontSize: '0.85rem' }}>
+                        <span style={{ fontWeight: 600, color: 'var(--accent-primary)' }}>{formatCurrency(rule.amount)}</span> {rule.type}
+                        <div style={{ fontSize: '0.75rem', opacity: 0.7 }}>
+                            Starting Month {rule.startMonth} {rule.durationMonths ? `for ${rule.durationMonths}mo` : 'until phase ends'}
+                        </div>
+                    </div>
+                    <button
+                        onClick={() => handleRemoveRule(phase, rule.id)}
+                        className="btn-icon"
+                        style={{ padding: '4px', color: 'var(--color-danger)', background: 'transparent', border: 'none', cursor: 'pointer' }}
+                    >
+                        <Trash2 size={14} />
+                    </button>
+                </div>
+            ))}
+        </div>
+    );
 
     return (
         <div className="glass-panel" style={{ padding: 'var(--space-xl)', display: 'flex', flexDirection: 'column', gap: 'var(--space-md)', marginTop: 'var(--space-lg)', borderColor: enabled ? 'var(--accent-primary)' : 'var(--border-color)' }}>
@@ -205,6 +264,162 @@ export function ExternalStrategyForm({ externalLoan, onChange, enabled, onToggle
                                 </Tooltip>
                             </span>
                         </label>
+                    </div>
+
+                    {/* Extra Payments Collapsible Section */}
+                    <div className="col-span-full" style={{
+                        marginTop: 'var(--space-md)',
+                        borderRadius: 'var(--radius-md)',
+                        border: '1px solid var(--border-color)',
+                        background: 'rgba(255,255,255,0.02)',
+                        animation: 'fadeIn 0.4s ease'
+                    }}>
+                        <button
+                            onClick={() => setIsExpanded(!isExpanded)}
+                            style={{
+                                width: '100%',
+                                padding: 'var(--space-md)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'space-between',
+                                background: 'rgba(var(--accent-primary-rgb), 0.05)',
+                                border: 'none',
+                                color: 'var(--accent-primary)',
+                                fontWeight: 600,
+                                cursor: 'pointer',
+                                textAlign: 'left'
+                            }}
+                        >
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                {isExpanded ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
+                                Extra Payments (Principal Reduction)
+                                <Tooltip content="Set up rules to pay extra principal during the draw and/or repayment phase. This will reduce your balance faster and save interest.">
+                                    <Info size={14} style={{ cursor: 'help' }} />
+                                </Tooltip>
+                            </div>
+                            <div style={{ fontSize: '0.8rem', opacity: 0.8, fontWeight: 400 }}>
+                                {((externalLoan.drawPaymentSchedule?.length || 0) + (externalLoan.repayPaymentSchedule?.length || 0))} active rules
+                            </div>
+                        </button>
+
+                        {isExpanded && (
+                            <div style={{ padding: 'var(--space-md)', display: 'flex', flexDirection: 'column', gap: 'var(--space-lg)', animation: 'fadeIn 0.2s ease' }}>
+                                {/* Rule Builder Toggle */}
+                                {!isAdding ? (
+                                    <button
+                                        className="btn btn-secondary"
+                                        style={{ width: '100%', padding: '10px', display: 'flex', justifyContent: 'center', gap: '8px', border: '1px dashed var(--border-color)' }}
+                                        onClick={() => setIsAdding(true)}
+                                    >
+                                        <Plus size={16} /> Add Payment Rule
+                                    </button>
+                                ) : (
+                                    <div style={{ background: 'rgba(0,0,0,0.2)', padding: 'var(--space-md)', borderRadius: 'var(--radius-md)', display: 'flex', flexDirection: 'column', gap: 'var(--space-md)', border: '1px solid var(--accent-primary)' }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                            <h4 style={{ margin: 0, fontSize: '0.9rem' }}>New Payment Rule</h4>
+                                            {externalLoan.isInterestOnly && (
+                                                <div style={{ display: 'flex', gap: '4px', background: 'rgba(255,255,255,0.1)', padding: '2px', borderRadius: '4px' }}>
+                                                    <button
+                                                        onClick={() => setActivePhase('draw')}
+                                                        style={{ padding: '4px 8px', fontSize: '0.7rem', border: 'none', borderRadius: '3px', cursor: 'pointer', background: activePhase === 'draw' ? 'var(--accent-primary)' : 'transparent', color: activePhase === 'draw' ? 'white' : 'inherit' }}
+                                                    >
+                                                        Draw Phase
+                                                    </button>
+                                                    <button
+                                                        onClick={() => setActivePhase('repay')}
+                                                        style={{ padding: '4px 8px', fontSize: '0.7rem', border: 'none', borderRadius: '3px', cursor: 'pointer', background: activePhase === 'repay' ? 'var(--accent-primary)' : 'transparent', color: activePhase === 'repay' ? 'white' : 'inherit' }}
+                                                    >
+                                                        Repay Phase
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        <div className="grid grid-cols-2" style={{ gap: 'var(--space-sm)' }}>
+                                            <div className="input-group">
+                                                <label style={{ fontSize: '0.75rem' }}>Frequency</label>
+                                                <select
+                                                    value={newRule.type}
+                                                    onChange={(e) => setNewRule({ ...newRule, type: e.target.value as any })}
+                                                    style={{ width: '100%', padding: '0.6rem', background: 'rgba(0,0,0,0.3)', color: 'white', border: '1px solid var(--border-color)', borderRadius: '4px' }}
+                                                >
+                                                    <option value="monthly">Monthly</option>
+                                                    <option value="yearly">Yearly</option>
+                                                    <option value="one-time">One-Time</option>
+                                                </select>
+                                            </div>
+                                            <div className="input-group">
+                                                <label style={{ fontSize: '0.75rem' }}>Amount</label>
+                                                <div className="input-wrapper" style={{ height: '36px' }}>
+                                                    <DollarSign className="prefix" size={14} />
+                                                    <input
+                                                        type="number"
+                                                        className="has-prefix"
+                                                        style={{ fontSize: '0.85rem' }}
+                                                        value={newRule.amount || ''}
+                                                        onChange={(e) => setNewRule({ ...newRule, amount: Number(e.target.value) })}
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            <div className="input-group">
+                                                <label style={{ fontSize: '0.75rem' }}>Relative Start Month</label>
+                                                <input
+                                                    type="number"
+                                                    style={{ width: '100%', padding: '0.6rem', background: 'rgba(0,0,0,0.3)', color: 'white', border: '1px solid var(--border-color)', borderRadius: '4px', fontSize: '0.85rem' }}
+                                                    value={newRule.startMonth || ''}
+                                                    placeholder="1 = Phase Start"
+                                                    onChange={(e) => setNewRule({ ...newRule, startMonth: Number(e.target.value) })}
+                                                />
+                                            </div>
+
+                                            {newRule.type !== 'one-time' && (
+                                                <div className="input-group">
+                                                    <label style={{ fontSize: '0.75rem' }}>Duration (Months)</label>
+                                                    <input
+                                                        type="number"
+                                                        style={{ width: '100%', padding: '0.6rem', background: 'rgba(0,0,0,0.3)', color: 'white', border: '1px solid var(--border-color)', borderRadius: '4px', fontSize: '0.85rem' }}
+                                                        value={newRule.durationMonths || ''}
+                                                        placeholder="0 = Until phase ends"
+                                                        onChange={(e) => setNewRule({ ...newRule, durationMonths: Number(e.target.value) })}
+                                                    />
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        <div style={{ display: 'flex', gap: '8px', marginTop: 'auto', justifyContent: 'flex-end' }}>
+                                            <button className="btn" style={{ padding: '6px 12px', fontSize: '0.8rem' }} onClick={() => setIsAdding(false)}>Cancel</button>
+                                            <button className="btn btn-primary" style={{ padding: '6px 12px', fontSize: '0.8rem' }} onClick={handleAddRule}>Save Rule</button>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Rules Display */}
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-md)' }}>
+                                    {/* Draw Phase Rules (or only phase) */}
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                        <div style={{ fontSize: '0.75rem', fontWeight: 600, opacity: 0.6, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                                            {externalLoan.isInterestOnly ? 'Draw Phase Rules' : 'Loan Rules'}
+                                        </div>
+                                        {externalLoan.drawPaymentSchedule?.length ? renderRulesList(externalLoan.drawPaymentSchedule as ExternalPaymentRule[], 'draw') : (
+                                            <div style={{ fontSize: '0.8rem', opacity: 0.4, fontStyle: 'italic', padding: '8px' }}>No rules set for this phase</div>
+                                        )}
+                                    </div>
+
+                                    {/* Repay Phase Rules */}
+                                    {externalLoan.isInterestOnly && (
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                            <div style={{ fontSize: '0.75rem', fontWeight: 600, opacity: 0.6, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                                                Repay Phase Rules
+                                            </div>
+                                            {externalLoan.repayPaymentSchedule?.length ? renderRulesList(externalLoan.repayPaymentSchedule as ExternalPaymentRule[], 'repay') : (
+                                                <div style={{ fontSize: '0.8rem', opacity: 0.4, fontStyle: 'italic', padding: '8px' }}>No rules set for this phase</div>
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        )}
                     </div>
 
                 </div>

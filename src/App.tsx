@@ -34,6 +34,8 @@ function App() {
       termMonths: 60,
       repaymentTermMonths: 60,
       repaymentVariation: 0,
+      drawPaymentSchedule: [],
+      repayPaymentSchedule: [],
       startDateMonth: new Date().getMonth() + 1,
       startDateYear: new Date().getFullYear(),
       isInterestOnly: false

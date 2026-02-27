@@ -187,6 +187,14 @@ export function calculateAmortization(input: MortgageInput, overrideBaseDate?: D
     };
 }
 
+export interface ExternalPaymentRule {
+    id: string;
+    type: 'monthly' | 'yearly' | 'one-time';
+    amount: number;
+    startMonth: number; // 1-based index relative to the start of the phase
+    durationMonths?: number; // How many months to repeat. If missing/0, applies until end of phase
+}
+
 export interface ExternalLoanInput {
     amount: number;
     annualRate: number;
@@ -196,6 +204,8 @@ export interface ExternalLoanInput {
     startDateMonth?: number; // 1-12
     startDateYear?: number;
     isInterestOnly?: boolean;
+    drawPaymentSchedule?: ExternalPaymentRule[];
+    repayPaymentSchedule?: ExternalPaymentRule[];
 }
 
 export interface ArbitrageSummary {
@@ -233,46 +243,94 @@ export function calculateArbitrage(mortgageInput: MortgageInput, externalLoan: E
     const drawN = externalLoan.termMonths;
     const repayN = externalLoan.repaymentTermMonths || 0;
 
+    let drawInterest = 0;
+    let repayInterest = 0;
+    let currentBalance = externalLoan.amount;
     let externalMonthlyPayment = 0;
     let repaymentMonthlyPayment = 0;
-    let externalTotalInterest = 0;
-    let interestDuringDraw = 0;
-    let interestDuringRepayment = 0;
 
-    if (extR === 0) {
-        externalMonthlyPayment = externalLoan.amount / drawN;
-        externalTotalInterest = 0;
-    } else if (externalLoan.isInterestOnly) {
-        // Phase 1: Draw Period (Interest Only)
-        externalMonthlyPayment = externalLoan.amount * extR;
-        interestDuringDraw = externalMonthlyPayment * drawN;
+    const getExtraForMonth = (month: number, schedule?: ExternalPaymentRule[]) => {
+        if (!schedule) return 0;
+        let totalExtra = 0;
+        for (const rule of schedule) {
+            const isAfterStart = month >= rule.startMonth;
+            const isBeforeEnd = !rule.durationMonths || month < (rule.startMonth + rule.durationMonths);
 
-        // Phase 2: Repayment Period (Amortized)
-        if (repayN > 0) {
-            const repaymentRate = externalLoan.annualRate + (externalLoan.repaymentVariation || 0);
-            const repayR = Math.max(0, repaymentRate / 100 / 12);
+            if (isAfterStart && isBeforeEnd) {
+                if (rule.type === 'monthly') {
+                    totalExtra += rule.amount;
+                } else if (rule.type === 'yearly' && (month - rule.startMonth) % 12 === 0) {
+                    totalExtra += rule.amount;
+                } else if (rule.type === 'one-time' && month === rule.startMonth) {
+                    totalExtra += rule.amount;
+                }
+            }
+        }
+        return totalExtra;
+    };
 
-            if (repayR === 0) {
-                repaymentMonthlyPayment = externalLoan.amount / repayN;
-                externalTotalInterest = interestDuringDraw;
-            } else {
-                repaymentMonthlyPayment = (externalLoan.amount * repayR * Math.pow(1 + repayR, repayN)) / (Math.pow(1 + repayR, repayN) - 1);
-                const totalRepaymentPayment = repaymentMonthlyPayment * repayN;
-                interestDuringRepayment = totalRepaymentPayment - externalLoan.amount;
-                externalTotalInterest = interestDuringDraw + interestDuringRepayment;
+    // Phase 1: Draw Period (Interest Only)
+    for (let m = 1; m <= drawN; m++) {
+        if (currentBalance <= 0) break;
+
+        const monthlyInterest = currentBalance * extR;
+        drawInterest += monthlyInterest;
+
+        // During draw, the user MUST pay interest.
+        // We set externalMonthlyPayment to the interest of the FIRST month for UI display
+        if (m === 1) externalMonthlyPayment = monthlyInterest;
+
+        // Apply extra payments from schedule
+        let extra = getExtraForMonth(m, externalLoan.drawPaymentSchedule);
+
+        currentBalance -= extra;
+        if (currentBalance < 0) currentBalance = 0;
+    }
+
+    // Phase 2: Repayment Period (Amortized) OR standard loan amortization
+    if (externalLoan.isInterestOnly) {
+        if (repayN > 0 && currentBalance > 0) {
+            const repayRate = externalLoan.annualRate + (externalLoan.repaymentVariation || 0);
+            const repayR = Math.max(0, repayRate / 100 / 12);
+
+            // Standard amortized payment based on remaining balance at START of repayment
+            repaymentMonthlyPayment = calculateMonthlyPayment(currentBalance, repayRate, repayN / 12);
+
+            for (let m = 1; m <= repayN; m++) {
+                if (currentBalance <= 0) break;
+
+                const interest = currentBalance * repayR;
+                repayInterest += interest;
+
+                let principalPayment = repaymentMonthlyPayment - interest;
+                let extra = getExtraForMonth(m, externalLoan.repayPaymentSchedule);
+
+                currentBalance -= (principalPayment + extra);
+                if (currentBalance < 0) currentBalance = 0;
             }
         } else {
-            // Balloon payment at end of draw
-            externalTotalInterest = interestDuringDraw;
-            repaymentMonthlyPayment = externalLoan.amount; // Indicate the principal due
+            repaymentMonthlyPayment = currentBalance; // Balloon
         }
     } else {
-        // Standard Fixed Loan
-        externalMonthlyPayment = (externalLoan.amount * extR * Math.pow(1 + extR, drawN)) / (Math.pow(1 + extR, drawN) - 1);
-        const externalTotalPayment = externalMonthlyPayment * drawN;
-        externalTotalInterest = externalTotalPayment - externalLoan.amount;
-        interestDuringRepayment = externalTotalInterest; // For fixed loans, all interest is "repayment" interest
+        // Standard loan: calculateMonthlyPayment and then loop
+        externalMonthlyPayment = calculateMonthlyPayment(externalLoan.amount, externalLoan.annualRate, drawN / 12);
+        currentBalance = externalLoan.amount;
+
+        for (let m = 1; m <= drawN; m++) {
+            if (currentBalance <= 0) break;
+
+            const interest = currentBalance * extR;
+            repayInterest += interest;
+
+            let principalPayment = externalMonthlyPayment - interest;
+            let extra = getExtraForMonth(m, externalLoan.drawPaymentSchedule);
+
+            currentBalance -= (principalPayment + extra);
+            if (currentBalance < 0) currentBalance = 0;
+        }
     }
+
+    const externalTotalInterest = drawInterest + repayInterest;
 
     // Determine the month offset for the lump sum
     let lumpSumMonthIndex = 1;
@@ -300,8 +358,8 @@ export function calculateArbitrage(mortgageInput: MortgageInput, externalLoan: E
     return {
         externalMonthlyPayment,
         repaymentMonthlyPayment,
-        interestDuringDraw,
-        interestDuringRepayment,
+        interestDuringDraw: drawInterest,
+        interestDuringRepayment: repayInterest,
         externalTotalInterest,
         baselineMortgageInterest: baselineSummary.totalInterest,
         newMortgageInterest: newMortgageSummary.totalInterest,
