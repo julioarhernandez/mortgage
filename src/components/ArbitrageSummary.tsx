@@ -57,18 +57,6 @@ export function ArbitrageSummaryCard({ arbitrage }: ArbitrageSummaryProps) {
                     </div>
                 </div>
 
-                <div className="col-span-full" style={{ padding: 'var(--space-md)', background: 'rgba(0,0,0,0.3)', border: `1px solid ${mainColor}`, borderRadius: 'var(--radius-md)', textAlign: 'center' }}>
-                    <div className="text-muted" style={{ fontSize: '0.9rem', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '4px', justifyContent: 'center' }}>
-                        Net Financial Impact
-                        <Tooltip content="Calculated as: (Mortgage Interest Saved) - (External Loan Cost)">
-                            <Info size={14} style={{ cursor: 'help', color: 'var(--accent-primary)' }} />
-                        </Tooltip>
-                    </div>
-                    <div style={{ fontSize: '1.75rem', fontWeight: 700, color: mainColor }}>
-                        {isProfitable ? '+' : ''}{formatCurrency(arbitrage.netSavings)}
-                    </div>
-                </div>
-
                 <div className="col-span-full" style={{ padding: 'var(--space-md)', background: 'rgba(0,0,0,0.2)', borderRadius: 'var(--radius-md)' }}>
                     <div className="text-muted" style={{ fontSize: '0.85rem' }}>New Payoff Date</div>
                     <div style={{ fontSize: '1.25rem', fontWeight: 600, color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -84,6 +72,18 @@ export function ArbitrageSummaryCard({ arbitrage }: ArbitrageSummaryProps) {
                             Original payoff: {arbitrage.baselinePayoffDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
                         </div>
                     )}
+                </div>
+
+                <div style={{ padding: 'var(--space-md)', background: 'rgba(0,0,0,0.3)', border: `1px solid ${mainColor}`, borderRadius: 'var(--radius-md)', textAlign: 'center' }}>
+                    <div className="text-muted" style={{ fontSize: '0.9rem', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '4px', justifyContent: 'center' }}>
+                        Net Financial Impact
+                        <Tooltip content="Calculated as: (Mortgage Interest Saved) - (External Loan Cost)">
+                            <Info size={14} style={{ cursor: 'help', color: 'var(--accent-primary)' }} />
+                        </Tooltip>
+                    </div>
+                    <div style={{ fontSize: '1.75rem', fontWeight: 700, color: mainColor }}>
+                        {isProfitable ? '+' : ''}{formatCurrency(arbitrage.netSavings)}
+                    </div>
                 </div>
             </div>
         </div>
