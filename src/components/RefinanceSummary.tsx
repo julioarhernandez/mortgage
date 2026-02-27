@@ -89,14 +89,21 @@ export function RefinanceSummaryCard({ summary }: RefinanceSummaryCardProps) {
                 </div>
 
                 <div style={{ padding: 'var(--space-md)', background: 'rgba(0,0,0,0.2)', borderRadius: 'var(--radius-md)' }}>
-                    <div className="text-muted" style={{ fontSize: '0.85rem' }}>Total Cost (All-In)</div>
+                    <div className="text-muted" style={{ fontSize: '0.85rem' }}>Baseline Total Cost</div>
                     <div style={{ fontSize: '1.25rem', fontWeight: 600 }}>
+                        {formatCurrency(summary.baselineTotalPayment)}
+                    </div>
+                </div>
+
+                <div style={{ padding: 'var(--space-md)', background: isProfitable ? 'var(--accent-glow)' : 'rgba(239, 68, 68, 0.1)', border: `1px solid ${mainColor}`, borderRadius: 'var(--radius-md)' }}>
+                    <div className="text-muted" style={{ fontSize: '0.85rem' }}>Total Cost (All-In)</div>
+                    <div style={{ fontSize: '1.25rem', fontWeight: 600, color: mainColor }}>
                         {formatCurrency(summary.newTotalPayment)}
                     </div>
                 </div>
 
-                <div style={{ padding: 'var(--space-md)', background: 'rgba(0,0,0,0.3)', border: `1px solid ${mainColor}`, borderRadius: 'var(--radius-md)' }}>
-                    <div className="text-muted" style={{ fontSize: '0.9rem', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <div className="col-span-full" style={{ padding: 'var(--space-md)', background: 'rgba(0,0,0,0.3)', border: `1px solid ${mainColor}`, borderRadius: 'var(--radius-md)', textAlign: 'center' }}>
+                    <div className="text-muted" style={{ fontSize: '0.9rem', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '4px', justifyContent: 'center' }}>
                         Net Financial Impact
                         <span title="Calculated as: (Old Remaining Cost) - (New Remaining Cost) - (Upfront Costs)">
                             <Info size={14} style={{ cursor: 'help' }} />

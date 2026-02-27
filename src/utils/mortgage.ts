@@ -309,6 +309,7 @@ export interface RefinanceSummary {
     isProfitable: boolean;
     breakEvenMonth: number | null;
     newTotalPayment: number;
+    baselineTotalPayment: number;
 }
 
 /**
@@ -323,13 +324,16 @@ export function calculateRefinance(currentMortgage: MortgageInput, refinancePara
 
     // Determine the refinance month index
     let refinanceMonthIndex = refinanceParams.refinanceMonth || 1;
+    const startYearNum = currentMortgage.startYear || new Date().getFullYear();
+    const startMonthNum = currentMortgage.startMonth || new Date().getMonth() + 1;
 
     if (refinanceParams.refinanceYear && refinanceParams.refinanceMonthNum) {
-        const startYearNum = currentMortgage.startYear || new Date().getFullYear();
-        const startMonthNum = currentMortgage.startMonth || new Date().getMonth() + 1;
         const baseDate = new Date(startYearNum, startMonthNum - 1, 1);
         const refiDate = new Date(refinanceParams.refinanceYear, refinanceParams.refinanceMonthNum - 1, 1);
-        refinanceMonthIndex = (refiDate.getFullYear() - baseDate.getFullYear()) * 12 + (refiDate.getMonth() - baseDate.getMonth()) + 1;
+        // If Refi is Feb 2027 and Start is Feb 2026, diff is 12 months.
+        // We want refinanceMonthIndex to be 12 (meaning 12 payments made).
+        refinanceMonthIndex = (refiDate.getFullYear() - baseDate.getFullYear()) * 12 + (refiDate.getMonth() - baseDate.getMonth());
+        if (refinanceMonthIndex < 0) refinanceMonthIndex = 0;
     }
 
     // Find the remaining balance at the time of refinance
@@ -343,11 +347,19 @@ export function calculateRefinance(currentMortgage: MortgageInput, refinancePara
     if (targetRow) {
         remainingBalance = targetRow.remainingBalance;
         currentInterestPaidUpToRefi = targetRow.accumulatedInterest;
-        refiStartDate = targetRow.date;
+        refiStartDate = new Date(targetRow.date);
+    } else if (refinanceMonthIndex === 0) {
+        remainingBalance = currentMortgage.principal;
+        currentInterestPaidUpToRefi = 0;
+        refiStartDate = new Date(startYearNum, startMonthNum - 1, 1);
     } else if (refinanceMonthIndex > currentSummary.schedule.length && currentSummary.schedule.length > 0) {
         remainingBalance = 0;
-        refiStartDate = currentSummary.schedule[currentSummary.schedule.length - 1].date;
+        refiStartDate = new Date(currentSummary.schedule[currentSummary.schedule.length - 1].date);
     }
+
+    // The new loan's first payment should be 1 month AFTER the refinance point
+    const firstPaymentDate = new Date(refiStartDate);
+    firstPaymentDate.setMonth(firstPaymentDate.getMonth() + 1);
 
     const principalPaidBeforeRefinance = currentMortgage.principal - remainingBalance;
 
@@ -359,11 +371,11 @@ export function calculateRefinance(currentMortgage: MortgageInput, refinancePara
         principal: newLoanPrincipal,
         annualInterestRate: newAnnualRate,
         years: newTermYears,
-        startDate: new Date(refiStartDate),
+        startDate: firstPaymentDate,
         paymentSchedule: refinanceParams.includeExtraPayments ? currentMortgage.paymentSchedule : []
     };
 
-    const newSummary = calculateAmortization(newLoanInput, refiStartDate);
+    const newSummary = calculateAmortization(newLoanInput, firstPaymentDate);
     const newMonthlyPayment = newSummary.monthlyPayment;
     const newTotalInterest = newSummary.totalInterest;
     const newN = newSummary.totalMonths;
@@ -424,6 +436,7 @@ export function calculateRefinance(currentMortgage: MortgageInput, refinancePara
         monthsSaved: currentMonthsRemaining - newN,
         isProfitable: netSavings > 0,
         breakEvenMonth,
-        newTotalPayment: principalPaidBeforeRefinance + currentInterestPaidUpToRefi + newRemainingCost
+        newTotalPayment: principalPaidBeforeRefinance + currentInterestPaidUpToRefi + newRemainingCost,
+        baselineTotalPayment: currentSummary.totalPayment
     };
 }
