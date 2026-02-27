@@ -1,5 +1,6 @@
 import type { ExternalLoanInput } from '../utils/mortgage';
-import { DollarSign, Percent, Calendar } from 'lucide-react';
+import { DollarSign, Percent, Calendar, Info } from 'lucide-react';
+import { Tooltip } from './Tooltip';
 
 const MONTHS = [
     { value: 1, label: 'Jan' }, { value: 2, label: 'Feb' }, { value: 3, label: 'Mar' },
@@ -117,7 +118,12 @@ export function ExternalStrategyForm({ externalLoan, onChange, enabled, onToggle
                                 onChange={(e) => handleChange('isInterestOnly', e.target.checked as any)}
                                 style={{ width: '18px', height: '18px', accentColor: 'var(--accent-primary)' }}
                             />
-                            <span style={{ fontSize: '0.85rem' }}>Interest-Only HELOC (Pay at end)</span>
+                            <span style={{ fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                Interest-Only HELOC (Pay at end)
+                                <Tooltip content="You only pay interest monthly. The principal remains the same and must be paid as a lump sum at the end of the term.">
+                                    <Info size={14} style={{ cursor: 'help', color: 'var(--accent-primary)' }} />
+                                </Tooltip>
+                            </span>
                         </label>
                     </div>
 
