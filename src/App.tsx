@@ -44,26 +44,31 @@ function App() {
   const [extraPaymentsEnabled, setExtraPaymentsEnabled] = useState(false);
   const [isAmortizationExpanded, setIsAmortizationExpanded] = useState(false);
 
-  const summary = useMemo(() => {
+  const baseCalculatedInput = useMemo(() => {
     const activeInput = { ...input };
     if (!extraPaymentsEnabled) {
       activeInput.paymentSchedule = [];
-      activeInput.oneTimePayment = activeStrategy === 'arbitrage' ? externalLoan.amount : 0;
-    } else if (activeStrategy === 'arbitrage') {
+    }
+    return activeInput;
+  }, [input, extraPaymentsEnabled]);
+
+  const summary = useMemo(() => {
+    const activeInput = { ...baseCalculatedInput };
+    if (activeStrategy === 'arbitrage') {
       activeInput.oneTimePayment = (activeInput.oneTimePayment || 0) + externalLoan.amount;
     }
     return calculateAmortization(activeInput);
-  }, [input, extraPaymentsEnabled, activeStrategy, externalLoan]);
+  }, [baseCalculatedInput, activeStrategy, externalLoan]);
 
   const arbitrage = useMemo(() => {
     if (activeStrategy !== 'arbitrage') return null;
-    return calculateArbitrage(input, externalLoan);
-  }, [input, externalLoan, activeStrategy]);
+    return calculateArbitrage(baseCalculatedInput, externalLoan);
+  }, [baseCalculatedInput, externalLoan, activeStrategy]);
 
   const refinanceSummary = useMemo(() => {
     if (activeStrategy !== 'refinance') return null;
-    return calculateRefinance(input, refinanceForm);
-  }, [input, refinanceForm, activeStrategy]);
+    return calculateRefinance(baseCalculatedInput, refinanceForm);
+  }, [baseCalculatedInput, refinanceForm, activeStrategy]);
 
   return (
     <div className="container">
