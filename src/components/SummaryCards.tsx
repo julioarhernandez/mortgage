@@ -1,5 +1,6 @@
 import type { MortgageSummary } from '../utils/mortgage';
-import { DollarSign, Calendar, ArrowDownRight, Clock } from 'lucide-react';
+import { DollarSign, Calendar, ArrowDownRight, Clock, Info } from 'lucide-react';
+import { Tooltip } from './Tooltip';
 
 interface SummaryCardsProps {
     summary: MortgageSummary;
@@ -67,8 +68,13 @@ export function SummaryCards({ summary }: SummaryCardsProps) {
             </div>
 
             {/* Total Cost Card */}
-            <div className="glass-panel" style={{ gridColumn: '1 / -1', padding: 'var(--space-lg)', position: 'relative', overflow: 'hidden', textAlign: 'center', background: 'var(--bg-card-hover)', borderColor: 'var(--accent-secondary)' }}>
-                <h3 className="text-muted" style={{ fontSize: '1.1rem', fontWeight: 500 }}>Total Cost (All-In)</h3>
+            <div className="glass-panel" style={{ gridColumn: '1 / -1', padding: 'var(--space-lg)', position: 'relative', textAlign: 'center', background: 'var(--bg-card-hover)', borderColor: 'var(--accent-secondary)' }}>
+                <h3 className="text-muted" style={{ fontSize: '1.1rem', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>
+                    Total Cost (All-In)
+                    <Tooltip content="The total lifecycle cost of your home. This includes the original loan amount plus every dollar of interest paid over the life of the mortgage.">
+                        <Info size={16} style={{ cursor: 'help', color: 'var(--accent-primary)' }} />
+                    </Tooltip>
+                </h3>
                 <div className="text-value text-gradient" style={{ marginTop: 'var(--space-sm)' }}>
                     {formatCurrency(summary.totalPayment)}
                 </div>
