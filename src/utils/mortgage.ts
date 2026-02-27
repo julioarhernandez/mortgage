@@ -208,6 +208,8 @@ export interface ArbitrageSummary {
     monthsSaved: number;
     isProfitable: boolean;
     newTotalPayment: number;
+    newPayoffDate: Date;
+    baselinePayoffDate: Date;
 }
 
 /**
@@ -273,7 +275,9 @@ export function calculateArbitrage(mortgageInput: MortgageInput, externalLoan: E
         baselinePayoffMonths: baselineSummary.totalMonths,
         monthsSaved: baselineSummary.totalMonths - newMortgageSummary.totalMonths,
         isProfitable: netSavings > 0,
-        newTotalPayment: newMortgageSummary.totalPayment + externalTotalInterest
+        newTotalPayment: newMortgageSummary.totalPayment + externalTotalInterest,
+        newPayoffDate: newMortgageSummary.payoffDate,
+        baselinePayoffDate: baselineSummary.payoffDate
     };
 }
 

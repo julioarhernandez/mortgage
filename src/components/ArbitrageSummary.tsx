@@ -67,6 +67,23 @@ export function ArbitrageSummaryCard({ arbitrage }: ArbitrageSummaryProps) {
                         {isProfitable ? '+' : ''}{formatCurrency(arbitrage.netSavings)}
                     </div>
                 </div>
+
+                <div style={{ padding: 'var(--space-md)', background: 'rgba(0,0,0,0.2)', borderRadius: 'var(--radius-md)', gridColumn: '1 / 3' }}>
+                    <div className="text-muted" style={{ fontSize: '0.85rem' }}>New Payoff Date</div>
+                    <div style={{ fontSize: '1.25rem', fontWeight: 600, color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        {arbitrage.newPayoffDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
+                        {arbitrage.monthsSaved > 0 && (
+                            <span style={{ fontSize: '0.8rem', color: 'var(--accent-primary)', background: 'var(--accent-glow)', padding: '2px 8px', borderRadius: '12px' }}>
+                                {Math.floor(arbitrage.monthsSaved / 12)}y {arbitrage.monthsSaved % 12}m earlier
+                            </span>
+                        )}
+                    </div>
+                    {arbitrage.monthsSaved > 0 && (
+                        <div className="text-muted" style={{ fontSize: '0.75rem', marginTop: '4px' }}>
+                            Original payoff: {arbitrage.baselinePayoffDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
     );
