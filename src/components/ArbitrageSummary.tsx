@@ -41,21 +41,15 @@ export function ArbitrageSummaryCard({ arbitrage }: ArbitrageSummaryProps) {
                 </div>
 
                 <div style={{ padding: 'var(--space-md)', background: 'rgba(0,0,0,0.2)', borderRadius: 'var(--radius-md)' }}>
-                    <div className="text-muted" style={{ fontSize: '0.85rem' }}>External Loan Cost (Interest)</div>
+                    <div className="text-muted" style={{ fontSize: '0.85rem' }}>Total External Interest</div>
                     <div style={{ fontSize: '1.25rem', fontWeight: 600, color: 'var(--color-danger)' }}>
                         -{formatCurrency(arbitrage.externalTotalInterest)}
                     </div>
-                    <div className="text-muted" style={{ fontSize: '0.75rem' }}>
-                        {arbitrage.repaymentMonthlyPayment && arbitrage.repaymentMonthlyPayment > 0 ? (
-                            <>
-                                Draw: {formatCurrency(arbitrage.externalMonthlyPayment)}/mo
-                                <br />
-                                Repay: {formatCurrency(arbitrage.repaymentMonthlyPayment)}/mo
-                            </>
-                        ) : (
-                            `(${formatCurrency(arbitrage.externalMonthlyPayment)}/mo)`
-                        )}
-                    </div>
+                    {(!arbitrage.repaymentMonthlyPayment || arbitrage.repaymentMonthlyPayment === 0) && (
+                        <div className="text-muted" style={{ fontSize: '0.75rem' }}>
+                            ({formatCurrency(arbitrage.externalMonthlyPayment)}/mo)
+                        </div>
+                    )}
                 </div>
 
                 <div style={{ padding: 'var(--space-md)', background: 'rgba(0,0,0,0.2)', borderRadius: 'var(--radius-md)' }}>
@@ -86,6 +80,46 @@ export function ArbitrageSummaryCard({ arbitrage }: ArbitrageSummaryProps) {
                         </div>
                     )}
                 </div>
+
+                {!!(arbitrage.repaymentMonthlyPayment && arbitrage.repaymentMonthlyPayment > 0) && (
+                    <>
+                        {/* Draw Phase Section */}
+                        <div className="col-span-full" style={{ marginTop: 'var(--space-md)', fontWeight: 600, color: 'var(--text-main)', fontSize: '1.1rem', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '8px' }}>
+                            Draw Period (Interest-Only)
+                        </div>
+                        <div style={{ padding: 'var(--space-md)', background: 'rgba(0,0,0,0.2)', borderRadius: 'var(--radius-md)' }}>
+                            <div className="text-muted" style={{ fontSize: '0.85rem' }}>Draw Monthly Payment</div>
+                            <div style={{ fontSize: '1.25rem', fontWeight: 600 }}>
+                                {formatCurrency(arbitrage.externalMonthlyPayment)}
+                            </div>
+                        </div>
+
+                        <div style={{ padding: 'var(--space-md)', background: 'rgba(0,0,0,0.2)', borderRadius: 'var(--radius-md)' }}>
+                            <div className="text-muted" style={{ fontSize: '0.85rem' }}>Draw Phase Interest</div>
+                            <div style={{ fontSize: '1.25rem', fontWeight: 600, color: 'var(--color-danger)' }}>
+                                {formatCurrency(arbitrage.interestDuringDraw || 0)}
+                            </div>
+                        </div>
+
+                        {/* Repayment Phase Section */}
+                        <div className="col-span-full" style={{ marginTop: 'var(--space-sm)', fontWeight: 600, color: 'var(--text-main)', fontSize: '1.1rem', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '8px' }}>
+                            Repayment Period (Amortized)
+                        </div>
+                        <div style={{ padding: 'var(--space-md)', background: 'rgba(var(--accent-primary-rgb), 0.1)', borderRadius: 'var(--radius-md)', border: '1px solid rgba(var(--accent-primary-rgb), 0.2)' }}>
+                            <div className="text-muted" style={{ fontSize: '0.85rem' }}>Repayment Monthly Pmt</div>
+                            <div style={{ fontSize: '1.25rem', fontWeight: 600 }}>
+                                {formatCurrency(arbitrage.repaymentMonthlyPayment)}
+                            </div>
+                        </div>
+
+                        <div style={{ padding: 'var(--space-md)', background: 'rgba(var(--accent-primary-rgb), 0.1)', borderRadius: 'var(--radius-md)', border: '1px solid rgba(var(--accent-primary-rgb), 0.2)' }}>
+                            <div className="text-muted" style={{ fontSize: '0.85rem' }}>Repay Phase Interest</div>
+                            <div style={{ fontSize: '1.25rem', fontWeight: 600, color: 'var(--color-danger)' }}>
+                                {formatCurrency(arbitrage.interestDuringRepayment || 0)}
+                            </div>
+                        </div>
+                    </>
+                )}
 
                 <div className="col-span-full" style={{ padding: 'var(--space-md)', background: 'rgba(0,0,0,0.3)', border: `1px solid ${mainColor}`, borderRadius: 'var(--radius-md)', textAlign: 'center' }}>
                     <div className="text-muted" style={{ fontSize: '0.9rem', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '4px', justifyContent: 'center' }}>

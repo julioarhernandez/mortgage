@@ -201,6 +201,8 @@ export interface ExternalLoanInput {
 export interface ArbitrageSummary {
     externalMonthlyPayment: number; // During draw if IO, during amortization if fixed
     repaymentMonthlyPayment?: number; // Monthly payment during repayment phase
+    interestDuringDraw?: number;     // Total interest paid during draw period
+    interestDuringRepayment?: number; // Total interest paid during repayment period
     externalTotalInterest: number;
     newMortgageInterest: number;
     baselineMortgageInterest: number;
@@ -234,6 +236,8 @@ export function calculateArbitrage(mortgageInput: MortgageInput, externalLoan: E
     let externalMonthlyPayment = 0;
     let repaymentMonthlyPayment = 0;
     let externalTotalInterest = 0;
+    let interestDuringDraw = 0;
+    let interestDuringRepayment = 0;
 
     if (extR === 0) {
         externalMonthlyPayment = externalLoan.amount / drawN;
@@ -241,7 +245,7 @@ export function calculateArbitrage(mortgageInput: MortgageInput, externalLoan: E
     } else if (externalLoan.isInterestOnly) {
         // Phase 1: Draw Period (Interest Only)
         externalMonthlyPayment = externalLoan.amount * extR;
-        const interestDuringDraw = externalMonthlyPayment * drawN;
+        interestDuringDraw = externalMonthlyPayment * drawN;
 
         // Phase 2: Repayment Period (Amortized)
         if (repayN > 0) {
@@ -254,7 +258,7 @@ export function calculateArbitrage(mortgageInput: MortgageInput, externalLoan: E
             } else {
                 repaymentMonthlyPayment = (externalLoan.amount * repayR * Math.pow(1 + repayR, repayN)) / (Math.pow(1 + repayR, repayN) - 1);
                 const totalRepaymentPayment = repaymentMonthlyPayment * repayN;
-                const interestDuringRepayment = totalRepaymentPayment - externalLoan.amount;
+                interestDuringRepayment = totalRepaymentPayment - externalLoan.amount;
                 externalTotalInterest = interestDuringDraw + interestDuringRepayment;
             }
         } else {
@@ -267,6 +271,7 @@ export function calculateArbitrage(mortgageInput: MortgageInput, externalLoan: E
         externalMonthlyPayment = (externalLoan.amount * extR * Math.pow(1 + extR, drawN)) / (Math.pow(1 + extR, drawN) - 1);
         const externalTotalPayment = externalMonthlyPayment * drawN;
         externalTotalInterest = externalTotalPayment - externalLoan.amount;
+        interestDuringRepayment = externalTotalInterest; // For fixed loans, all interest is "repayment" interest
     }
 
     // Determine the month offset for the lump sum
@@ -294,6 +299,9 @@ export function calculateArbitrage(mortgageInput: MortgageInput, externalLoan: E
 
     return {
         externalMonthlyPayment,
+        repaymentMonthlyPayment,
+        interestDuringDraw,
+        interestDuringRepayment,
         externalTotalInterest,
         baselineMortgageInterest: baselineSummary.totalInterest,
         newMortgageInterest: newMortgageSummary.totalInterest,
