@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { calculateAmortization, calculateArbitrage, calculateRefinance, type MortgageInput, type ExternalLoanInput, type RefinanceInput } from './utils/mortgage';
 import { CalculatorForm } from './components/CalculatorForm';
@@ -13,38 +13,82 @@ import { RefinanceSummaryCard } from './components/RefinanceSummary';
 import './index.css';
 
 function App() {
-  const [input, setInput] = useState<MortgageInput>({
-    principal: 300000,
-    annualInterestRate: 5.5,
-    years: 30,
-    extraMonthlyPayment: 0,
-    extraYearlyPayment: 0,
-    oneTimePayment: 0,
-    oneTimePaymentMonth: 12
+  const [input, setInput] = useState<MortgageInput>(() => {
+    const saved = localStorage.getItem('mortgage-input');
+    return saved ? JSON.parse(saved) : {
+      principal: 300000,
+      annualInterestRate: 5.5,
+      years: 30,
+      extraMonthlyPayment: 0,
+      extraYearlyPayment: 0,
+      oneTimePayment: 0,
+      oneTimePaymentMonth: 12
+    };
   });
 
-  const [externalLoan, setExternalLoan] = useState<ExternalLoanInput>({
-    amount: 50000,
-    annualRate: 7.5,
-    termMonths: 60,
-    startDateMonth: new Date().getMonth() + 1,
-    startDateYear: new Date().getFullYear(),
-    isInterestOnly: false
+  const [externalLoan, setExternalLoan] = useState<ExternalLoanInput>(() => {
+    const saved = localStorage.getItem('mortgage-external-loan');
+    return saved ? JSON.parse(saved) : {
+      amount: 50000,
+      annualRate: 7.5,
+      termMonths: 60,
+      startDateMonth: new Date().getMonth() + 1,
+      startDateYear: new Date().getFullYear(),
+      isInterestOnly: false
+    };
   });
 
-  const [refinanceForm, setRefinanceForm] = useState<RefinanceInput>({
-    refinanceMonthNum: new Date().getMonth() + 1,
-    refinanceYear: new Date().getFullYear() + 2,
-    newAnnualRate: 4.5,
-    newTermYears: 30,
-    closingCosts: 5000,
-    rollClosingCostsIntoLoan: true
+  const [refinanceForm, setRefinanceForm] = useState<RefinanceInput>(() => {
+    const saved = localStorage.getItem('mortgage-refinance-form');
+    return saved ? JSON.parse(saved) : {
+      refinanceMonthNum: new Date().getMonth() + 1,
+      refinanceYear: new Date().getFullYear() + 2,
+      newAnnualRate: 4.5,
+      newTermYears: 30,
+      closingCosts: 5000,
+      rollClosingCostsIntoLoan: true
+    };
   });
 
-  const [activeStrategy, setActiveStrategy] = useState<'none' | 'arbitrage' | 'refinance'>('none');
+  const [activeStrategy, setActiveStrategy] = useState<'none' | 'arbitrage' | 'refinance'>(() => {
+    const saved = localStorage.getItem('mortgage-active-strategy');
+    return (saved as any) || 'none';
+  });
 
-  const [extraPaymentsEnabled, setExtraPaymentsEnabled] = useState(false);
-  const [isAmortizationExpanded, setIsAmortizationExpanded] = useState(false);
+  const [extraPaymentsEnabled, setExtraPaymentsEnabled] = useState(() => {
+    const saved = localStorage.getItem('mortgage-extra-payments-enabled');
+    return saved ? JSON.parse(saved) : false;
+  });
+
+  const [isAmortizationExpanded, setIsAmortizationExpanded] = useState(() => {
+    const saved = localStorage.getItem('mortgage-amortization-expanded');
+    return saved ? JSON.parse(saved) : false;
+  });
+
+  // Persist state to localStorage
+  useEffect(() => {
+    localStorage.setItem('mortgage-input', JSON.stringify(input));
+  }, [input]);
+
+  useEffect(() => {
+    localStorage.setItem('mortgage-external-loan', JSON.stringify(externalLoan));
+  }, [externalLoan]);
+
+  useEffect(() => {
+    localStorage.setItem('mortgage-refinance-form', JSON.stringify(refinanceForm));
+  }, [refinanceForm]);
+
+  useEffect(() => {
+    localStorage.setItem('mortgage-active-strategy', activeStrategy);
+  }, [activeStrategy]);
+
+  useEffect(() => {
+    localStorage.setItem('mortgage-extra-payments-enabled', JSON.stringify(extraPaymentsEnabled));
+  }, [extraPaymentsEnabled]);
+
+  useEffect(() => {
+    localStorage.setItem('mortgage-amortization-expanded', JSON.stringify(isAmortizationExpanded));
+  }, [isAmortizationExpanded]);
 
   const baseCalculatedInput = useMemo(() => {
     const activeInput = { ...input };
