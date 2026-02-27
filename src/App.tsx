@@ -27,6 +27,8 @@ function App() {
     amount: 50000,
     annualRate: 7.5,
     termMonths: 60,
+    startDateMonth: new Date().getMonth() + 1,
+    startDateYear: new Date().getFullYear(),
     isInterestOnly: false
   });
 

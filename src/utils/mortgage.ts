@@ -191,6 +191,8 @@ export interface ExternalLoanInput {
     amount: number;
     annualRate: number;
     termMonths: number;
+    startDateMonth?: number; // 1-12
+    startDateYear?: number;
     isInterestOnly?: boolean;
 }
 
@@ -237,11 +239,23 @@ export function calculateArbitrage(mortgageInput: MortgageInput, externalLoan: E
         externalTotalInterest = externalTotalPayment - externalLoan.amount;
     }
 
+    // Determine the month offset for the lump sum
+    let lumpSumMonthIndex = 1;
+
+    if (externalLoan.startDateMonth && externalLoan.startDateYear) {
+        const startYearNum = mortgageInput.startYear || new Date().getFullYear();
+        const startMonthNum = mortgageInput.startMonth || new Date().getMonth() + 1;
+        const baseDate = new Date(startYearNum, startMonthNum - 1, 1);
+        const lumpSumDate = new Date(externalLoan.startDateYear, externalLoan.startDateMonth - 1, 1);
+        lumpSumMonthIndex = (lumpSumDate.getFullYear() - baseDate.getFullYear()) * 12 + (lumpSumDate.getMonth() - baseDate.getMonth()) + 1;
+        if (lumpSumMonthIndex < 1) lumpSumMonthIndex = 1;
+    }
+
     // 3. Calculate new mortgage WITH the lump sum
     const newMortgageSummary = calculateAmortization({
         ...mortgageInput,
         oneTimePayment: externalLoan.amount,
-        oneTimePaymentMonth: 1 // applied immediately
+        oneTimePaymentMonth: lumpSumMonthIndex
     });
 
     // 4. Compare

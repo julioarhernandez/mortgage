@@ -1,6 +1,13 @@
 import type { ExternalLoanInput } from '../utils/mortgage';
 import { DollarSign, Percent, Calendar } from 'lucide-react';
 
+const MONTHS = [
+    { value: 1, label: 'Jan' }, { value: 2, label: 'Feb' }, { value: 3, label: 'Mar' },
+    { value: 4, label: 'Apr' }, { value: 5, label: 'May' }, { value: 6, label: 'Jun' },
+    { value: 7, label: 'Jul' }, { value: 8, label: 'Aug' }, { value: 9, label: 'Sep' },
+    { value: 10, label: 'Oct' }, { value: 11, label: 'Nov' }, { value: 12, label: 'Dec' }
+];
+
 interface ExternalStrategyFormProps {
     externalLoan: ExternalLoanInput;
     onChange: (input: ExternalLoanInput) => void;
@@ -80,8 +87,29 @@ export function ExternalStrategyForm({ externalLoan, onChange, enabled, onToggle
                         </div>
                     </div>
 
+                    {/* Start Date */}
+                    <div className="input-group" style={{ gridColumn: '1 / 3' }}>
+                        <label>Application Date (When the lump sum is applied)</label>
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                            <select
+                                style={{ flex: 1, padding: '0.75rem', background: 'rgba(0,0,0,0.2)', color: 'var(--text-main)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)' }}
+                                value={externalLoan.startDateMonth || new Date().getMonth() + 1}
+                                onChange={(e) => handleChange('startDateMonth', Number(e.target.value))}
+                            >
+                                {MONTHS.map(m => <option key={m.value} value={m.value}>{m.label}</option>)}
+                            </select>
+                            <input
+                                type="number"
+                                placeholder="YYYY"
+                                style={{ flex: 1 }}
+                                value={externalLoan.startDateYear || new Date().getFullYear()}
+                                onChange={(e) => handleChange('startDateYear', Number(e.target.value))}
+                            />
+                        </div>
+                    </div>
+
                     {/* Checkbox (Interest Only) */}
-                    <div className="input-group" style={{ justifyContent: 'center' }}>
+                    <div className="input-group" style={{ gridColumn: '1 / 3', justifyContent: 'center', marginTop: 'calc(-1 * var(--space-md))' }}>
                         <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', gap: '8px', color: 'var(--text-main)', marginTop: '24px' }}>
                             <input
                                 type="checkbox"
