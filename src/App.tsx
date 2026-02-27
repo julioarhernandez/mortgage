@@ -79,7 +79,7 @@ function App() {
 
       <div className="grid grid-cols-3">
         {/* Left Column: Form */}
-        <div style={{ gridColumn: '1 / 2', display: 'flex', flexDirection: 'column', gap: 'var(--space-lg)' }}>
+        <div className="lg-col-span-1" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-lg)' }}>
           <CalculatorForm input={input} onChange={setInput} />
           <ExtraPaymentsForm
             input={input}
@@ -102,7 +102,7 @@ function App() {
         </div>
 
         {/* Right Column: Dashboard & Charts */}
-        <div style={{ gridColumn: '2 / 4', display: 'flex', flexDirection: 'column', gap: 'var(--space-lg)' }}>
+        <div className="lg-col-span-2" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-lg)' }}>
           <SummaryCards summary={summary} />
           {arbitrage && <ArbitrageSummaryCard arbitrage={arbitrage} />}
           {refinanceSummary && <RefinanceSummaryCard summary={refinanceSummary} />}

@@ -68,7 +68,7 @@ export function ArbitrageSummaryCard({ arbitrage }: ArbitrageSummaryProps) {
                     </div>
                 </div>
 
-                <div style={{ padding: 'var(--space-md)', background: 'rgba(0,0,0,0.2)', borderRadius: 'var(--radius-md)', gridColumn: '1 / 3' }}>
+                <div className="col-span-full" style={{ padding: 'var(--space-md)', background: 'rgba(0,0,0,0.2)', borderRadius: 'var(--radius-md)' }}>
                     <div className="text-muted" style={{ fontSize: '0.85rem' }}>New Payoff Date</div>
                     <div style={{ fontSize: '1.25rem', fontWeight: 600, color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '8px' }}>
                         {arbitrage.newPayoffDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}

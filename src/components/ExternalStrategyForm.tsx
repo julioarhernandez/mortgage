@@ -88,7 +88,7 @@ export function ExternalStrategyForm({ externalLoan, onChange, enabled, onToggle
                     </div>
 
                     {/* Start Date */}
-                    <div className="input-group" style={{ gridColumn: '1 / 3' }}>
+                    <div className="input-group col-span-full">
                         <label>Application Date (When the lump sum is applied)</label>
                         <div style={{ display: 'flex', gap: '8px' }}>
                             <select
@@ -109,7 +109,7 @@ export function ExternalStrategyForm({ externalLoan, onChange, enabled, onToggle
                     </div>
 
                     {/* Checkbox (Interest Only) */}
-                    <div className="input-group" style={{ gridColumn: '1 / 3', justifyContent: 'center', marginTop: 'calc(-1 * var(--space-md))' }}>
+                    <div className="input-group col-span-full" style={{ justifyContent: 'center', marginTop: 'calc(-1 * var(--space-md))' }}>
                         <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', gap: '8px', color: 'var(--text-main)', marginTop: '24px' }}>
                             <input
                                 type="checkbox"
