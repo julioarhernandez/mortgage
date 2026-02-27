@@ -53,12 +53,8 @@ function App() {
   }, [input, extraPaymentsEnabled]);
 
   const summary = useMemo(() => {
-    const activeInput = { ...baseCalculatedInput };
-    if (activeStrategy === 'arbitrage') {
-      activeInput.oneTimePayment = (activeInput.oneTimePayment || 0) + externalLoan.amount;
-    }
-    return calculateAmortization(activeInput);
-  }, [baseCalculatedInput, activeStrategy, externalLoan]);
+    return calculateAmortization(baseCalculatedInput);
+  }, [baseCalculatedInput]);
 
   const arbitrage = useMemo(() => {
     if (activeStrategy !== 'arbitrage') return null;
