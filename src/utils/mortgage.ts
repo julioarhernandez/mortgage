@@ -289,6 +289,7 @@ export interface RefinanceInput {
     newTermYears: number;
     closingCosts: number;
     rollClosingCostsIntoLoan: boolean;
+    includeExtraPayments?: boolean;
 }
 
 export interface RefinanceSummary {
@@ -353,21 +354,19 @@ export function calculateRefinance(currentMortgage: MortgageInput, refinancePara
     // Determine the new loan principal
     const newLoanPrincipal = rollClosingCostsIntoLoan ? remainingBalance + closingCosts : remainingBalance;
 
-    // Calculate new loan
-    const newMonthlyPayment = calculateMonthlyPayment(newLoanPrincipal, newAnnualRate, newTermYears);
-    const newN = newTermYears * 12;
+    // Calculate new loan via calculateAmortization for higher fidelity (consistent extra payment logic)
+    const newLoanInput: MortgageInput = {
+        principal: newLoanPrincipal,
+        annualInterestRate: newAnnualRate,
+        years: newTermYears,
+        startDate: new Date(refiStartDate),
+        paymentSchedule: refinanceParams.includeExtraPayments ? currentMortgage.paymentSchedule : []
+    };
 
-    let newTotalInterest = 0;
-    // Calculate new loan interest
-    let tempBalance = newLoanPrincipal;
-    const newR = newAnnualRate / 100 / 12;
-    for (let i = 0; i < newN; i++) {
-        if (tempBalance <= 0) break;
-        const interestPmt = tempBalance * newR;
-        const principalPmt = newMonthlyPayment - interestPmt;
-        newTotalInterest += interestPmt;
-        tempBalance -= principalPmt;
-    }
+    const newSummary = calculateAmortization(newLoanInput, refiStartDate);
+    const newMonthlyPayment = newSummary.monthlyPayment;
+    const newTotalInterest = newSummary.totalInterest;
+    const newN = newSummary.totalMonths;
 
     // Calculate remaining current interest if we didn't refinance
     // Assuming no extra payments are made after the refinance date in the baseline

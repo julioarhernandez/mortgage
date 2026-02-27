@@ -118,6 +118,18 @@ export function RefinanceStrategyForm({ refinanceForm, onChange, enabled, onTogg
                             <span>Roll Closing Costs into New Loan Balance</span>
                         </label>
                     </div>
+
+                    <div className="input-group">
+                        <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', gap: '8px', color: 'var(--text-main)' }}>
+                            <input
+                                type="checkbox"
+                                checked={refinanceForm.includeExtraPayments ?? true}
+                                onChange={(e) => handleChange('includeExtraPayments', e.target.checked)}
+                                style={{ width: '18px', height: '18px', accentColor: 'var(--accent-primary)' }}
+                            />
+                            <span>Include Extra Payments in Calculation</span>
+                        </label>
+                    </div>
                 </div>
             )}
         </div>

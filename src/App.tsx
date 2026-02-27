@@ -46,7 +46,8 @@ function App() {
       newAnnualRate: 4.5,
       newTermYears: 30,
       closingCosts: 5000,
-      rollClosingCostsIntoLoan: true
+      rollClosingCostsIntoLoan: true,
+      includeExtraPayments: true
     };
   });
 
