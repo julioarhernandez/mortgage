@@ -1,5 +1,6 @@
 import type { RefinanceSummary } from '../utils/mortgage';
 import { CheckCircle, XCircle, Info } from 'lucide-react';
+import { Tooltip } from './Tooltip';
 
 interface RefinanceSummaryCardProps {
     summary: RefinanceSummary;
@@ -105,9 +106,9 @@ export function RefinanceSummaryCard({ summary }: RefinanceSummaryCardProps) {
                 <div className="col-span-full" style={{ padding: 'var(--space-md)', background: 'rgba(0,0,0,0.3)', border: `1px solid ${mainColor}`, borderRadius: 'var(--radius-md)', textAlign: 'center' }}>
                     <div className="text-muted" style={{ fontSize: '0.9rem', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '4px', justifyContent: 'center' }}>
                         Net Financial Impact
-                        <span title="Calculated as: (Old Remaining Cost) - (New Remaining Cost) - (Upfront Costs)">
-                            <Info size={14} style={{ cursor: 'help' }} />
-                        </span>
+                        <Tooltip content="Calculated as: (Old Remaining Cost) - (New Remaining Cost) - (Upfront Costs)">
+                            <Info size={14} style={{ cursor: 'help', color: 'var(--accent-primary)' }} />
+                        </Tooltip>
                     </div>
                     <div style={{ fontSize: '1.75rem', fontWeight: 700, color: mainColor }}>
                         {isProfitable ? '+' : ''}{formatCurrency(summary.netSavings)}
