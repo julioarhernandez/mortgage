@@ -192,6 +192,7 @@ export interface ExternalLoanInput {
     annualRate: number;
     termMonths: number; // Draw period if isInterestOnly, total term otherwise
     repaymentTermMonths?: number; // Only used if isInterestOnly is true
+    repaymentVariation?: number; // Optional variation (+/- percentage) for repayment phase
     startDateMonth?: number; // 1-12
     startDateYear?: number;
     isInterestOnly?: boolean;
@@ -244,10 +245,18 @@ export function calculateArbitrage(mortgageInput: MortgageInput, externalLoan: E
 
         // Phase 2: Repayment Period (Amortized)
         if (repayN > 0) {
-            repaymentMonthlyPayment = (externalLoan.amount * extR * Math.pow(1 + extR, repayN)) / (Math.pow(1 + extR, repayN) - 1);
-            const totalRepaymentPayment = repaymentMonthlyPayment * repayN;
-            const interestDuringRepayment = totalRepaymentPayment - externalLoan.amount;
-            externalTotalInterest = interestDuringDraw + interestDuringRepayment;
+            const repaymentRate = externalLoan.annualRate + (externalLoan.repaymentVariation || 0);
+            const repayR = Math.max(0, repaymentRate / 100 / 12);
+
+            if (repayR === 0) {
+                repaymentMonthlyPayment = externalLoan.amount / repayN;
+                externalTotalInterest = interestDuringDraw;
+            } else {
+                repaymentMonthlyPayment = (externalLoan.amount * repayR * Math.pow(1 + repayR, repayN)) / (Math.pow(1 + repayR, repayN) - 1);
+                const totalRepaymentPayment = repaymentMonthlyPayment * repayN;
+                const interestDuringRepayment = totalRepaymentPayment - externalLoan.amount;
+                externalTotalInterest = interestDuringDraw + interestDuringRepayment;
+            }
         } else {
             // Balloon payment at end of draw
             externalTotalInterest = interestDuringDraw;

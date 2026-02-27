@@ -33,6 +33,7 @@ function App() {
       annualRate: 7.5,
       termMonths: 60,
       repaymentTermMonths: 60,
+      repaymentVariation: 0,
       startDateMonth: new Date().getMonth() + 1,
       startDateYear: new Date().getFullYear(),
       isInterestOnly: false

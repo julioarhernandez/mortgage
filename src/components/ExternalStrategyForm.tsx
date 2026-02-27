@@ -97,23 +97,75 @@ export function ExternalStrategyForm({ externalLoan, onChange, enabled, onToggle
 
                     {/* Repayment Term (HELOC Only) */}
                     {externalLoan.isInterestOnly && (
-                        <div className="input-group col-span-full" style={{ animation: 'fadeIn 0.2s ease' }}>
-                            <label style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                Repayment Period (Months)
-                                <Tooltip content="The time you have to fully pay back the loan principal and interest after the Draw Period ends.">
-                                    <Info size={14} style={{ cursor: 'help', color: 'var(--accent-primary)' }} />
-                                </Tooltip>
-                            </label>
-                            <div className="input-wrapper">
-                                <Calendar className="prefix" size={18} />
-                                <input
-                                    type="number"
-                                    className="has-prefix"
-                                    value={externalLoan.repaymentTermMonths || ''}
-                                    onChange={(e) => handleChange('repaymentTermMonths', Number(e.target.value))}
-                                />
+                        <>
+                            <div className="input-group col-span-full" style={{ animation: 'fadeIn 0.2s ease' }}>
+                                <label style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                    Repayment Period (Months)
+                                    <Tooltip content="The time you have to fully pay back the loan principal and interest after the Draw Period ends.">
+                                        <Info size={14} style={{ cursor: 'help', color: 'var(--accent-primary)' }} />
+                                    </Tooltip>
+                                </label>
+                                <div className="input-wrapper">
+                                    <Calendar className="prefix" size={18} />
+                                    <input
+                                        type="number"
+                                        className="has-prefix"
+                                        value={externalLoan.repaymentTermMonths || ''}
+                                        onChange={(e) => handleChange('repaymentTermMonths', Number(e.target.value))}
+                                    />
+                                </div>
                             </div>
-                        </div>
+
+                            {/* Rate Variation */}
+                            <div className="input-group col-span-full" style={{ animation: 'fadeIn 0.2s ease', marginTop: 'var(--space-sm)' }}>
+                                <label style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                    Repayment Rate Adjustment (%)
+                                    <Tooltip content="Adjust the annual interest rate for the repayment phase. Useful for modeling variable rate HELOCs.">
+                                        <Info size={14} style={{ cursor: 'help', color: 'var(--accent-primary)' }} />
+                                    </Tooltip>
+                                </label>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-sm)' }}>
+                                    <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                                        <input
+                                            type="range"
+                                            min="-10"
+                                            max="10"
+                                            step="0.1"
+                                            style={{ flex: 1, accentColor: 'var(--accent-primary)' }}
+                                            value={externalLoan.repaymentVariation || 0}
+                                            onChange={(e) => handleChange('repaymentVariation', parseFloat(e.target.value))}
+                                        />
+                                        <div className="input-wrapper" style={{ width: '100px' }}>
+                                            <Percent className="prefix" size={14} />
+                                            <input
+                                                type="number"
+                                                className="has-prefix"
+                                                step="0.1"
+                                                style={{ padding: '0.4rem 0.4rem 0.4rem 2rem', fontSize: '0.9rem' }}
+                                                value={externalLoan.repaymentVariation || 0}
+                                                onChange={(e) => handleChange('repaymentVariation', parseFloat(e.target.value))}
+                                            />
+                                        </div>
+                                    </div>
+                                    <div style={{
+                                        padding: 'var(--space-sm) var(--space-md)',
+                                        background: 'rgba(var(--accent-primary-rgb), 0.1)',
+                                        borderRadius: 'var(--radius-sm)',
+                                        border: '1px solid rgba(var(--accent-primary-rgb), 0.2)',
+                                        fontSize: '0.85rem',
+                                        color: 'var(--accent-primary)',
+                                        display: 'flex',
+                                        justifyContent: 'space-between',
+                                        alignItems: 'center'
+                                    }}>
+                                        <span>Projected Repayment Rate</span>
+                                        <span style={{ fontWeight: 700 }}>
+                                            {(externalLoan.annualRate + (externalLoan.repaymentVariation || 0)).toFixed(2)}%
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </>
                     )}
 
                     {/* Start Date */}
