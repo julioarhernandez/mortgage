@@ -190,14 +190,16 @@ export function calculateAmortization(input: MortgageInput, overrideBaseDate?: D
 export interface ExternalLoanInput {
     amount: number;
     annualRate: number;
-    termMonths: number;
+    termMonths: number; // Draw period if isInterestOnly, total term otherwise
+    repaymentTermMonths?: number; // Only used if isInterestOnly is true
     startDateMonth?: number; // 1-12
     startDateYear?: number;
     isInterestOnly?: boolean;
 }
 
 export interface ArbitrageSummary {
-    externalMonthlyPayment: number;
+    externalMonthlyPayment: number; // During draw if IO, during amortization if fixed
+    repaymentMonthlyPayment?: number; // Monthly payment during repayment phase
     externalTotalInterest: number;
     newMortgageInterest: number;
     baselineMortgageInterest: number;
@@ -225,19 +227,36 @@ export function calculateArbitrage(mortgageInput: MortgageInput, externalLoan: E
 
     // 2. Calculate the external loan cost
     const extR = externalLoan.annualRate / 100 / 12;
-    const extN = externalLoan.termMonths;
+    const drawN = externalLoan.termMonths;
+    const repayN = externalLoan.repaymentTermMonths || 0;
+
     let externalMonthlyPayment = 0;
+    let repaymentMonthlyPayment = 0;
     let externalTotalInterest = 0;
 
     if (extR === 0) {
-        externalMonthlyPayment = externalLoan.amount / extN;
+        externalMonthlyPayment = externalLoan.amount / drawN;
         externalTotalInterest = 0;
     } else if (externalLoan.isInterestOnly) {
+        // Phase 1: Draw Period (Interest Only)
         externalMonthlyPayment = externalLoan.amount * extR;
-        externalTotalInterest = externalMonthlyPayment * extN;
+        const interestDuringDraw = externalMonthlyPayment * drawN;
+
+        // Phase 2: Repayment Period (Amortized)
+        if (repayN > 0) {
+            repaymentMonthlyPayment = (externalLoan.amount * extR * Math.pow(1 + extR, repayN)) / (Math.pow(1 + extR, repayN) - 1);
+            const totalRepaymentPayment = repaymentMonthlyPayment * repayN;
+            const interestDuringRepayment = totalRepaymentPayment - externalLoan.amount;
+            externalTotalInterest = interestDuringDraw + interestDuringRepayment;
+        } else {
+            // Balloon payment at end of draw
+            externalTotalInterest = interestDuringDraw;
+            repaymentMonthlyPayment = externalLoan.amount; // Indicate the principal due
+        }
     } else {
-        externalMonthlyPayment = (externalLoan.amount * extR * Math.pow(1 + extR, extN)) / (Math.pow(1 + extR, extN) - 1);
-        const externalTotalPayment = externalMonthlyPayment * extN;
+        // Standard Fixed Loan
+        externalMonthlyPayment = (externalLoan.amount * extR * Math.pow(1 + extR, drawN)) / (Math.pow(1 + extR, drawN) - 1);
+        const externalTotalPayment = externalMonthlyPayment * drawN;
         externalTotalInterest = externalTotalPayment - externalLoan.amount;
     }
 

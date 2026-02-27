@@ -46,12 +46,25 @@ export function ArbitrageSummaryCard({ arbitrage }: ArbitrageSummaryProps) {
                         -{formatCurrency(arbitrage.externalTotalInterest)}
                     </div>
                     <div className="text-muted" style={{ fontSize: '0.75rem' }}>
-                        ({formatCurrency(arbitrage.externalMonthlyPayment)}/mo)
+                        {arbitrage.repaymentMonthlyPayment && arbitrage.repaymentMonthlyPayment > 0 ? (
+                            <>
+                                Draw: {formatCurrency(arbitrage.externalMonthlyPayment)}/mo
+                                <br />
+                                Repay: {formatCurrency(arbitrage.repaymentMonthlyPayment)}/mo
+                            </>
+                        ) : (
+                            `(${formatCurrency(arbitrage.externalMonthlyPayment)}/mo)`
+                        )}
                     </div>
                 </div>
 
                 <div style={{ padding: 'var(--space-md)', background: 'rgba(0,0,0,0.2)', borderRadius: 'var(--radius-md)' }}>
-                    <div className="text-muted" style={{ fontSize: '0.85rem' }}>Total Cost (All-In)</div>
+                    <div className="text-muted" style={{ fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        Total Cost (All-In)
+                        <Tooltip content="Sum of every dollar spent to reach $0 debt: (Mortgage Payments) + (External Loan Interest) + (External Loan Principal Repayment).">
+                            <Info size={12} style={{ cursor: 'help', color: 'var(--accent-primary)' }} />
+                        </Tooltip>
+                    </div>
                     <div style={{ fontSize: '1.25rem', fontWeight: 600 }}>
                         {formatCurrency(arbitrage.newTotalPayment)}
                     </div>

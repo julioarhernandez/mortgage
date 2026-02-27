@@ -75,8 +75,15 @@ export function ExternalStrategyForm({ externalLoan, onChange, enabled, onToggle
                     </div>
 
                     {/* Term */}
-                    <div className="input-group">
-                        <label>External Term (Months)</label>
+                    <div className="input-group col-span-full">
+                        <label style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            {externalLoan.isInterestOnly ? 'Draw Period (Months)' : 'Loan Term (Months)'}
+                            <Tooltip content={externalLoan.isInterestOnly
+                                ? "The length of the 'Interest-Only' phase. If your HELOC has already started, enter the number of months remaining in your draw period."
+                                : "The total length of the loan in months."}>
+                                <Info size={14} style={{ cursor: 'help', color: 'var(--accent-primary)' }} />
+                            </Tooltip>
+                        </label>
                         <div className="input-wrapper">
                             <Calendar className="prefix" size={18} />
                             <input
@@ -87,6 +94,27 @@ export function ExternalStrategyForm({ externalLoan, onChange, enabled, onToggle
                             />
                         </div>
                     </div>
+
+                    {/* Repayment Term (HELOC Only) */}
+                    {externalLoan.isInterestOnly && (
+                        <div className="input-group col-span-full" style={{ animation: 'fadeIn 0.2s ease' }}>
+                            <label style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                Repayment Period (Months)
+                                <Tooltip content="The time you have to fully pay back the loan principal and interest after the Draw Period ends.">
+                                    <Info size={14} style={{ cursor: 'help', color: 'var(--accent-primary)' }} />
+                                </Tooltip>
+                            </label>
+                            <div className="input-wrapper">
+                                <Calendar className="prefix" size={18} />
+                                <input
+                                    type="number"
+                                    className="has-prefix"
+                                    value={externalLoan.repaymentTermMonths || ''}
+                                    onChange={(e) => handleChange('repaymentTermMonths', Number(e.target.value))}
+                                />
+                            </div>
+                        </div>
+                    )}
 
                     {/* Start Date */}
                     <div className="input-group col-span-full">
