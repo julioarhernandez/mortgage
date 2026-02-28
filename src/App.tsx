@@ -122,9 +122,9 @@ function App() {
     <div className="container">
       <header style={{ marginBottom: 'var(--space-xl)', textAlign: 'center' }}>
         <h1 className="text-gradient" style={{ fontSize: '3rem', marginBottom: 'var(--space-sm)' }}>
-          Mortgage Pro
+          Mortgage Velocity
         </h1>
-        <p className="text-muted">Advanced Amortization & Extra Payment Analyzer</p>
+        <p className="text-muted">Advanced Amortization, Dynamic Extra Payments, HELOC Arbitrage & Refinance Strategy Analyzer</p>
       </header>
 
       <div className="grid grid-cols-3">
