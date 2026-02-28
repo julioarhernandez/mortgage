@@ -152,8 +152,8 @@ function App() {
         </div>
 
         {/* Right Column: Dashboard & Charts */}
-        <div className="lg-col-span-2">
-          <div className="sticky-column" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-lg)' }}>
+        <div className="lg-col-span-2 sticky-column">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-lg)' }}>
             <SummaryCards summary={summary} />
             {arbitrage && <ArbitrageSummaryCard arbitrage={arbitrage} />}
             {refinanceSummary && <RefinanceSummaryCard summary={refinanceSummary} />}
