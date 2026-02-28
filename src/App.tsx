@@ -152,14 +152,16 @@ function App() {
         </div>
 
         {/* Right Column: Dashboard & Charts */}
-        <div className="lg-col-span-2" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-lg)' }}>
-          <SummaryCards summary={summary} />
-          {arbitrage && <ArbitrageSummaryCard arbitrage={arbitrage} />}
-          {refinanceSummary && <RefinanceSummaryCard summary={refinanceSummary} />}
+        <div className="lg-col-span-2">
+          <div className="sticky-column" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-lg)' }}>
+            <SummaryCards summary={summary} />
+            {arbitrage && <ArbitrageSummaryCard arbitrage={arbitrage} />}
+            {refinanceSummary && <RefinanceSummaryCard summary={refinanceSummary} />}
 
-          <div className="glass-panel" style={{ padding: 'var(--space-lg)' }}>
-            <h2 style={{ marginBottom: 'var(--space-md)' }}>Principal vs Interest</h2>
-            <AmortizationChart schedule={summary.schedule} />
+            <div className="glass-panel" style={{ padding: 'var(--space-lg)' }}>
+              <h2 style={{ marginBottom: 'var(--space-md)' }}>Principal vs Interest</h2>
+              <AmortizationChart schedule={summary.schedule} />
+            </div>
           </div>
         </div>
       </div>
