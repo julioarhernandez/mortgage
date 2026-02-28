@@ -71,6 +71,11 @@ function App() {
     return saved ? JSON.parse(saved) : false;
   });
 
+  const [isGraphExpanded, setIsGraphExpanded] = useState(() => {
+    const saved = localStorage.getItem('mortgage-graph-expanded');
+    return saved ? JSON.parse(saved) : false;
+  });
+
   // Persist state to localStorage
   useEffect(() => {
     localStorage.setItem('mortgage-input', JSON.stringify(input));
@@ -95,6 +100,11 @@ function App() {
   useEffect(() => {
     localStorage.setItem('mortgage-amortization-expanded', JSON.stringify(isAmortizationExpanded));
   }, [isAmortizationExpanded]);
+
+
+  useEffect(() => {
+    localStorage.setItem('mortgage-graph-expanded', JSON.stringify(isGraphExpanded));
+  }, [isGraphExpanded]);
 
   const baseCalculatedInput = useMemo(() => {
     const activeInput = { ...input };
@@ -158,10 +168,14 @@ function App() {
             {arbitrage && <ArbitrageSummaryCard arbitrage={arbitrage} />}
             {refinanceSummary && <RefinanceSummaryCard summary={refinanceSummary} />}
 
-            <div className="glass-panel" style={{ padding: 'var(--space-lg)' }}>
+            <div className="glass-panel" style={{ padding: 'var(--space-lg)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', userSelect: 'none' }}
+              onClick={() => setIsGraphExpanded(!isGraphExpanded)}>
               <h2 style={{ marginBottom: 'var(--space-md)' }}>Principal vs Interest</h2>
-              <AmortizationChart schedule={summary.schedule} />
+              <div style={{ padding: '8px', background: 'rgba(0,0,0,0.2)', borderRadius: '50%', color: 'var(--accent-primary)' }}>
+                {isGraphExpanded ? <ChevronUp size={24} /> : <ChevronDown size={24} />}
+              </div>
             </div>
+            {isGraphExpanded && <AmortizationChart schedule={summary.schedule} />}
           </div>
         </div>
       </div>
