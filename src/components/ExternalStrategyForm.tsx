@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { ExternalLoanInput, ExternalPaymentRule } from '../utils/mortgage';
-import { DollarSign, Percent, Calendar, Info, Plus, Trash2, ChevronDown, ChevronRight } from 'lucide-react';
+import { DollarSign, Percent, Calendar, Info, Plus, Trash2, PlusCircle } from 'lucide-react';
 import { Tooltip } from './Tooltip';
 
 const MONTHS = [
@@ -18,7 +18,6 @@ interface ExternalStrategyFormProps {
 }
 
 export function ExternalStrategyForm({ externalLoan, onChange, enabled, onToggleEnabled }: ExternalStrategyFormProps) {
-    const [isExpanded, setIsExpanded] = useState(false);
     const [isAdding, setIsAdding] = useState(false);
     const [activePhase, setActivePhase] = useState<'draw' | 'repay'>('draw');
 
@@ -58,27 +57,6 @@ export function ExternalStrategyForm({ externalLoan, onChange, enabled, onToggle
 
     const formatCurrency = (val: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(val);
 
-    const renderRulesList = (rules: ExternalPaymentRule[], phase: 'draw' | 'repay') => (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            {rules.map(rule => (
-                <div key={rule.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.05)', padding: '10px 14px', borderRadius: 'var(--radius-sm)', border: '1px solid rgba(255,255,255,0.1)' }}>
-                    <div style={{ fontSize: '0.85rem' }}>
-                        <span style={{ fontWeight: 600, color: 'var(--accent-primary)' }}>{formatCurrency(rule.amount)}</span> {rule.type}
-                        <div style={{ fontSize: '0.75rem', opacity: 0.7 }}>
-                            Starting Month {rule.startMonth} {rule.durationMonths ? `for ${rule.durationMonths}mo` : 'until phase ends'}
-                        </div>
-                    </div>
-                    <button
-                        onClick={() => handleRemoveRule(phase, rule.id)}
-                        className="btn-icon"
-                        style={{ padding: '4px', color: 'var(--color-danger)', background: 'transparent', border: 'none', cursor: 'pointer' }}
-                    >
-                        <Trash2 size={14} />
-                    </button>
-                </div>
-            ))}
-        </div>
-    );
 
     return (
         <div className="glass-panel" style={{ padding: 'var(--space-xl)', display: 'flex', flexDirection: 'column', gap: 'var(--space-md)', marginTop: 'var(--space-lg)', borderColor: enabled ? 'var(--accent-primary)' : 'var(--border-color)' }}>
@@ -266,68 +244,145 @@ export function ExternalStrategyForm({ externalLoan, onChange, enabled, onToggle
                         </label>
                     </div>
 
-                    {/* Extra Payments Collapsible Section */}
+                    {/* Extra Payments Section (Design Parity with Base Extra Payments) */}
                     <div className="col-span-full" style={{
                         marginTop: 'var(--space-md)',
+                        padding: 'var(--space-xl)',
+                        background: 'rgba(255,255,255,0.01)',
+                        border: '1px solid',
+                        borderColor: externalLoan.extraPaymentsEnabled ? 'var(--accent-primary)' : 'var(--border-color)',
                         borderRadius: 'var(--radius-md)',
-                        border: '1px solid var(--border-color)',
-                        background: 'rgba(255,255,255,0.02)',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: 'var(--space-md)',
                         animation: 'fadeIn 0.4s ease'
                     }}>
-                        <button
-                            onClick={() => setIsExpanded(!isExpanded)}
-                            style={{
-                                width: '100%',
-                                padding: 'var(--space-md)',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'space-between',
-                                background: 'rgba(var(--accent-primary-rgb), 0.05)',
-                                border: 'none',
-                                color: 'var(--accent-primary)',
-                                fontWeight: 600,
-                                cursor: 'pointer',
-                                textAlign: 'left'
-                            }}
-                        >
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                {isExpanded ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
-                                Extra Payments (Principal Reduction)
-                                <Tooltip content="Set up rules to pay extra principal during the draw and/or repayment phase. This will reduce your balance faster and save interest.">
-                                    <Info size={14} style={{ cursor: 'help' }} />
-                                </Tooltip>
-                            </div>
-                            <div style={{ fontSize: '0.8rem', opacity: 0.8, fontWeight: 400 }}>
-                                {((externalLoan.drawPaymentSchedule?.length || 0) + (externalLoan.repayPaymentSchedule?.length || 0))} active rules
-                            </div>
-                        </button>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-xs)' }}>
+                            <h2 style={{ margin: 0, fontSize: '1.25rem', display: 'flex', alignItems: 'center' }}>
+                                <PlusCircle size={24} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '8px', color: 'var(--accent-primary)' }} />
+                                Extra Payments
+                            </h2>
+                            <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', gap: '8px' }}>
+                                <span style={{ fontSize: '0.9rem', color: externalLoan.extraPaymentsEnabled ? 'var(--accent-primary)' : 'var(--text-muted)' }}>
+                                    {externalLoan.extraPaymentsEnabled ? 'Active' : 'Enable'}
+                                </span>
+                                <input
+                                    type="checkbox"
+                                    checked={externalLoan.extraPaymentsEnabled || false}
+                                    onChange={(e) => handleChange('extraPaymentsEnabled', e.target.checked)}
+                                    style={{ width: '20px', height: '20px', accentColor: 'var(--accent-primary)' }}
+                                />
+                            </label>
+                        </div>
 
-                        {isExpanded && (
-                            <div style={{ padding: 'var(--space-md)', display: 'flex', flexDirection: 'column', gap: 'var(--space-lg)', animation: 'fadeIn 0.2s ease' }}>
+                        <p className="text-muted" style={{ fontSize: '0.9rem', marginBottom: 'var(--space-sm)' }}>
+                            Build a dynamic schedule for this external loan. See how adding extra principal contributions help you pay off the debt faster and reduce the total cost of the strategy.
+                        </p>
+
+                        {externalLoan.extraPaymentsEnabled && (
+                            <div style={{ animation: 'fadeIn 0.3s ease', display: 'flex', flexDirection: 'column', gap: 'var(--space-md)' }}>
+
+                                {/* List of Active Rules (Targeting Draw/Repay) */}
+                                {((externalLoan.drawPaymentSchedule?.length || 0) + (externalLoan.repayPaymentSchedule?.length || 0)) > 0 && (
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-md)' }}>
+                                        {/* Draw Rules */}
+                                        {externalLoan.drawPaymentSchedule?.length ? (
+                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                                <div style={{ fontSize: '0.75rem', fontWeight: 600, opacity: 0.6, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                                                    {externalLoan.isInterestOnly ? 'Draw Phase Rules' : 'Loan Rules'}
+                                                </div>
+                                                {externalLoan.drawPaymentSchedule.map(rule => (
+                                                    <div key={rule.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(0,0,0,0.2)', padding: '12px 16px', borderRadius: 'var(--radius-md)' }}>
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                                            <div style={{ padding: '8px', background: 'var(--bg-card)', borderRadius: '50%' }}>
+                                                                <Calendar size={16} className="text-muted" />
+                                                            </div>
+                                                            <div>
+                                                                <div style={{ fontWeight: 500 }}>
+                                                                    Pay <span style={{ color: 'var(--accent-primary)' }}>{formatCurrency(rule.amount)}</span> {rule.type}
+                                                                </div>
+                                                                <div className="text-muted" style={{ fontSize: '0.8rem' }}>
+                                                                    {rule.type === 'one-time'
+                                                                        ? `Month ${rule.startMonth}`
+                                                                        : `Starting Month ${rule.startMonth} ${rule.durationMonths ? `for ${rule.durationMonths}mo` : 'until phase ends'}`
+                                                                    }
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <button
+                                                            className="btn btn-icon"
+                                                            style={{ color: 'var(--color-danger)', background: 'transparent', padding: '8px', border: 'none', cursor: 'pointer' }}
+                                                            onClick={() => handleRemoveRule('draw', rule.id)}
+                                                        >
+                                                            <Trash2 size={18} />
+                                                        </button>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        ) : null}
+
+                                        {/* Repay Rules */}
+                                        {externalLoan.isInterestOnly && externalLoan.repayPaymentSchedule?.length ? (
+                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                                <div style={{ fontSize: '0.75rem', fontWeight: 600, opacity: 0.6, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                                                    Repay Phase Rules
+                                                </div>
+                                                {externalLoan.repayPaymentSchedule.map(rule => (
+                                                    <div key={rule.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(0,0,0,0.2)', padding: '12px 16px', borderRadius: 'var(--radius-md)' }}>
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                                            <div style={{ padding: '8px', background: 'var(--bg-card)', borderRadius: '50%' }}>
+                                                                <Calendar size={16} className="text-muted" />
+                                                            </div>
+                                                            <div>
+                                                                <div style={{ fontWeight: 500 }}>
+                                                                    Pay <span style={{ color: 'var(--accent-primary)' }}>{formatCurrency(rule.amount)}</span> {rule.type}
+                                                                </div>
+                                                                <div className="text-muted" style={{ fontSize: '0.8rem' }}>
+                                                                    {rule.type === 'one-time'
+                                                                        ? `Month ${rule.startMonth}`
+                                                                        : `Starting Month ${rule.startMonth} ${rule.durationMonths ? `for ${rule.durationMonths}mo` : 'until phase ends'}`
+                                                                    }
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <button
+                                                            className="btn btn-icon"
+                                                            style={{ color: 'var(--color-danger)', background: 'transparent', padding: '8px', border: 'none', cursor: 'pointer' }}
+                                                            onClick={() => handleRemoveRule('repay', rule.id)}
+                                                        >
+                                                            <Trash2 size={18} />
+                                                        </button>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        ) : null}
+                                    </div>
+                                )}
+
                                 {/* Rule Builder Toggle */}
                                 {!isAdding ? (
                                     <button
-                                        className="btn btn-secondary"
-                                        style={{ width: '100%', padding: '10px', display: 'flex', justifyContent: 'center', gap: '8px', border: '1px dashed var(--border-color)' }}
+                                        className="btn"
+                                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '12px', background: 'var(--bg-card-hover)', border: '1px dashed var(--border-color)', width: '100%', cursor: 'pointer', color: 'var(--text-main)' }}
                                         onClick={() => setIsAdding(true)}
                                     >
-                                        <Plus size={16} /> Add Payment Rule
+                                        <Plus size={18} /> Add Payment Rule
                                     </button>
                                 ) : (
-                                    <div style={{ background: 'rgba(0,0,0,0.2)', padding: 'var(--space-md)', borderRadius: 'var(--radius-md)', display: 'flex', flexDirection: 'column', gap: 'var(--space-md)', border: '1px solid var(--accent-primary)' }}>
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                            <h4 style={{ margin: 0, fontSize: '0.9rem' }}>New Payment Rule</h4>
+                                    <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', padding: 'var(--space-lg)', display: 'flex', flexDirection: 'column', gap: 'var(--space-md)', animation: 'fadeIn 0.2s ease' }}>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-sm)' }}>
+                                            <h4 style={{ margin: 0, fontSize: '1rem' }}>New Payment Rule</h4>
                                             {externalLoan.isInterestOnly && (
-                                                <div style={{ display: 'flex', gap: '4px', background: 'rgba(255,255,255,0.1)', padding: '2px', borderRadius: '4px' }}>
+                                                <div style={{ display: 'flex', gap: '4px', background: 'rgba(0,0,0,0.2)', padding: '4px', borderRadius: 'var(--radius-md)', width: 'fit-content' }}>
                                                     <button
                                                         onClick={() => setActivePhase('draw')}
-                                                        style={{ padding: '4px 8px', fontSize: '0.7rem', border: 'none', borderRadius: '3px', cursor: 'pointer', background: activePhase === 'draw' ? 'var(--accent-primary)' : 'transparent', color: activePhase === 'draw' ? 'white' : 'inherit' }}
+                                                        style={{ padding: '6px 16px', fontSize: '0.8rem', border: 'none', borderRadius: '4px', cursor: 'pointer', background: activePhase === 'draw' ? 'var(--accent-primary)' : 'transparent', color: 'white' }}
                                                     >
                                                         Draw Phase
                                                     </button>
                                                     <button
                                                         onClick={() => setActivePhase('repay')}
-                                                        style={{ padding: '4px 8px', fontSize: '0.7rem', border: 'none', borderRadius: '3px', cursor: 'pointer', background: activePhase === 'repay' ? 'var(--accent-primary)' : 'transparent', color: activePhase === 'repay' ? 'white' : 'inherit' }}
+                                                        style={{ padding: '6px 16px', fontSize: '0.8rem', border: 'none', borderRadius: '4px', cursor: 'pointer', background: activePhase === 'repay' ? 'var(--accent-primary)' : 'transparent', color: 'white' }}
                                                     >
                                                         Repay Phase
                                                     </button>
@@ -335,13 +390,13 @@ export function ExternalStrategyForm({ externalLoan, onChange, enabled, onToggle
                                             )}
                                         </div>
 
-                                        <div className="grid grid-cols-2" style={{ gap: 'var(--space-sm)' }}>
+                                        <div className="grid grid-cols-2" style={{ gap: 'var(--space-md)' }}>
                                             <div className="input-group">
-                                                <label style={{ fontSize: '0.75rem' }}>Frequency</label>
+                                                <label>Frequency</label>
                                                 <select
+                                                    style={{ width: '100%', padding: '0.75rem', background: 'rgba(0,0,0,0.2)', color: 'var(--text-main)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', outline: 'none' }}
                                                     value={newRule.type}
                                                     onChange={(e) => setNewRule({ ...newRule, type: e.target.value as any })}
-                                                    style={{ width: '100%', padding: '0.6rem', background: 'rgba(0,0,0,0.3)', color: 'white', border: '1px solid var(--border-color)', borderRadius: '4px' }}
                                                 >
                                                     <option value="monthly">Monthly</option>
                                                     <option value="yearly">Yearly</option>
@@ -349,36 +404,39 @@ export function ExternalStrategyForm({ externalLoan, onChange, enabled, onToggle
                                                 </select>
                                             </div>
                                             <div className="input-group">
-                                                <label style={{ fontSize: '0.75rem' }}>Amount</label>
-                                                <div className="input-wrapper" style={{ height: '36px' }}>
-                                                    <DollarSign className="prefix" size={14} />
+                                                <label>Amount</label>
+                                                <div className="input-wrapper">
+                                                    <DollarSign className="prefix" size={18} />
                                                     <input
                                                         type="number"
                                                         className="has-prefix"
-                                                        style={{ fontSize: '0.85rem' }}
                                                         value={newRule.amount || ''}
                                                         onChange={(e) => setNewRule({ ...newRule, amount: Number(e.target.value) })}
                                                     />
                                                 </div>
                                             </div>
 
-                                            <div className="input-group">
-                                                <label style={{ fontSize: '0.75rem' }}>Relative Start Month</label>
+                                            <div className="input-group col-span-full">
+                                                <label style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                    Start Month (Phase Relative)
+                                                    <Tooltip content="Month 1 is the very first month of the selected phase (Draw or Repay). The payment will trigger starting from this month onward.">
+                                                        <Info size={14} style={{ cursor: 'help', color: 'var(--accent-primary)' }} />
+                                                    </Tooltip>
+                                                </label>
                                                 <input
                                                     type="number"
-                                                    style={{ width: '100%', padding: '0.6rem', background: 'rgba(0,0,0,0.3)', color: 'white', border: '1px solid var(--border-color)', borderRadius: '4px', fontSize: '0.85rem' }}
+                                                    style={{ width: '100%', padding: '0.75rem', background: 'rgba(0,0,0,0.2)', color: 'var(--text-main)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', outline: 'none' }}
                                                     value={newRule.startMonth || ''}
-                                                    placeholder="1 = Phase Start"
+                                                    placeholder="1 = Start of Phase"
                                                     onChange={(e) => setNewRule({ ...newRule, startMonth: Number(e.target.value) })}
                                                 />
                                             </div>
-
                                             {newRule.type !== 'one-time' && (
-                                                <div className="input-group">
-                                                    <label style={{ fontSize: '0.75rem' }}>Duration (Months)</label>
+                                                <div className="input-group col-span-full">
+                                                    <label>Duration (Months)</label>
                                                     <input
                                                         type="number"
-                                                        style={{ width: '100%', padding: '0.6rem', background: 'rgba(0,0,0,0.3)', color: 'white', border: '1px solid var(--border-color)', borderRadius: '4px', fontSize: '0.85rem' }}
+                                                        style={{ width: '100%', padding: '0.75rem', background: 'rgba(0,0,0,0.2)', color: 'var(--text-main)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', outline: 'none' }}
                                                         value={newRule.durationMonths || ''}
                                                         placeholder="0 = Until phase ends"
                                                         onChange={(e) => setNewRule({ ...newRule, durationMonths: Number(e.target.value) })}
@@ -387,41 +445,15 @@ export function ExternalStrategyForm({ externalLoan, onChange, enabled, onToggle
                                             )}
                                         </div>
 
-                                        <div style={{ display: 'flex', gap: '8px', marginTop: 'auto', justifyContent: 'flex-end' }}>
-                                            <button className="btn" style={{ padding: '6px 12px', fontSize: '0.8rem' }} onClick={() => setIsAdding(false)}>Cancel</button>
-                                            <button className="btn btn-primary" style={{ padding: '6px 12px', fontSize: '0.8rem' }} onClick={handleAddRule}>Save Rule</button>
+                                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 'var(--space-sm)', marginTop: 'var(--space-sm)' }}>
+                                            <button className="btn" style={{ background: 'transparent', border: '1px solid var(--border-color)' }} onClick={() => setIsAdding(false)}>Cancel</button>
+                                            <button className="btn btn-primary" onClick={handleAddRule}>Save Rule</button>
                                         </div>
                                     </div>
                                 )}
-
-                                {/* Rules Display */}
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-md)' }}>
-                                    {/* Draw Phase Rules (or only phase) */}
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                        <div style={{ fontSize: '0.75rem', fontWeight: 600, opacity: 0.6, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                                            {externalLoan.isInterestOnly ? 'Draw Phase Rules' : 'Loan Rules'}
-                                        </div>
-                                        {externalLoan.drawPaymentSchedule?.length ? renderRulesList(externalLoan.drawPaymentSchedule as ExternalPaymentRule[], 'draw') : (
-                                            <div style={{ fontSize: '0.8rem', opacity: 0.4, fontStyle: 'italic', padding: '8px' }}>No rules set for this phase</div>
-                                        )}
-                                    </div>
-
-                                    {/* Repay Phase Rules */}
-                                    {externalLoan.isInterestOnly && (
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                            <div style={{ fontSize: '0.75rem', fontWeight: 600, opacity: 0.6, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                                                Repay Phase Rules
-                                            </div>
-                                            {externalLoan.repayPaymentSchedule?.length ? renderRulesList(externalLoan.repayPaymentSchedule as ExternalPaymentRule[], 'repay') : (
-                                                <div style={{ fontSize: '0.8rem', opacity: 0.4, fontStyle: 'italic', padding: '8px' }}>No rules set for this phase</div>
-                                            )}
-                                        </div>
-                                    )}
-                                </div>
                             </div>
                         )}
                     </div>
-
                 </div>
             )}
         </div>

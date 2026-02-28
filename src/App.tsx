@@ -36,6 +36,7 @@ function App() {
       repaymentVariation: 0,
       drawPaymentSchedule: [],
       repayPaymentSchedule: [],
+      extraPaymentsEnabled: false,
       startDateMonth: new Date().getMonth() + 1,
       startDateYear: new Date().getFullYear(),
       isInterestOnly: false

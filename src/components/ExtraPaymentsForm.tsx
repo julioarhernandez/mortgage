@@ -98,8 +98,13 @@ export function ExtraPaymentsForm({ input, onChange, enabled, onToggleEnabled }:
                                                 Pay <span style={{ color: 'var(--accent-primary)' }}>{formatCurrency(rule.amount)}</span> {rule.type}
                                             </div>
                                             <div className="text-muted" style={{ fontSize: '0.8rem' }}>
-                                                Starting {MONTHS.find(m => m.value === rule.startMonth)?.label} {rule.startYear}
-                                                {rule.endYear ? ` until ${MONTHS.find(m => m.value === rule.endMonth)?.label} ${rule.endYear} (or payoff)` : ' until loan payoff'}
+                                                {rule.type === 'one-time'
+                                                    ? `${MONTHS.find(m => m.value === rule.startMonth)?.label} ${rule.startYear}`
+                                                    : <>
+                                                        Starting {MONTHS.find(m => m.value === rule.startMonth)?.label} {rule.startYear}
+                                                        {rule.endYear ? ` until ${MONTHS.find(m => m.value === rule.endMonth)?.label} ${rule.endYear} (or payoff)` : ' until loan payoff'}
+                                                    </>
+                                                }
                                             </div>
                                         </div>
                                     </div>

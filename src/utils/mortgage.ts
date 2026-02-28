@@ -204,6 +204,7 @@ export interface ExternalLoanInput {
     startDateMonth?: number; // 1-12
     startDateYear?: number;
     isInterestOnly?: boolean;
+    extraPaymentsEnabled?: boolean;
     drawPaymentSchedule?: ExternalPaymentRule[];
     repayPaymentSchedule?: ExternalPaymentRule[];
 }
@@ -250,7 +251,7 @@ export function calculateArbitrage(mortgageInput: MortgageInput, externalLoan: E
     let repaymentMonthlyPayment = 0;
 
     const getExtraForMonth = (month: number, schedule?: ExternalPaymentRule[]) => {
-        if (!schedule) return 0;
+        if (!externalLoan.extraPaymentsEnabled || !schedule) return 0;
         let totalExtra = 0;
         for (const rule of schedule) {
             const isAfterStart = month >= rule.startMonth;
