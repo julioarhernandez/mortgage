@@ -3,8 +3,9 @@
 :root {
   /* Colors - Modern Dark Mode with Emerald Accents */
   --bg-dark: #0b0f19;
-  --bg-card: rgba(20, 26, 40, 0.6);
+  --bg-card: rgba(65, 71, 84 , 0.26);
   --bg-card-hover: rgba(30, 40, 60, 0.7);
+  --btn-bg: rgba(130, 149, 187, 0.35);
   --border-color: rgba(255, 255, 255, 0.08);
   --text-main: #f3f4f6;
   --text-muted: #9ca3af;
@@ -118,6 +119,14 @@ h1, h2, h3, h4 {
 .grid-cols-3 {
   grid-template-columns: repeat(1, 1fr);
 }
+.grid-cols-2-3 {
+  grid-template-columns: repeat(2, 1fr);
+}
+@media (min-width: 1024px) {
+  .grid-cols-2-3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
 .col-span-full { grid-column: 1 / -1; }
 @media (min-width: 768px) {
   .grid-cols-3 { grid-template-columns: repeat(3, 1fr); }
@@ -131,6 +140,21 @@ h1, h2, h3, h4 {
 .gap-4 { gap: var(--space-md); }
 .gap-6 { gap: var(--space-lg); }
 
+.grid-total-span-full {
+  grid-column:  1 / -1;
+}
+@media (max-width: 768px) {
+  .grid-total-span-full {
+    grid-column:  unset;
+  }
+}
+.grid-total-span-half {
+  grid-column:  2 / -1;
+}
+@media (max-width: 768px) {
+.grid-total-span-half {
+  grid-column:  1 / -1;
+}}
 /* Form Elements */
 .input-group {
   display: flex;

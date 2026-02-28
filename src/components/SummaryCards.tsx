@@ -14,7 +14,7 @@ export function SummaryCards({ summary }: SummaryCardsProps) {
         new Intl.DateTimeFormat('en-US', { month: 'short', year: 'numeric' }).format(date);
 
     return (
-        <div className="grid grid-cols-2" style={{ gap: 'var(--space-md)' }}>
+        <div className="grid grid-cols-2-3" style={{ gap: 'var(--space-md)' }}>
 
             {/* Monthly Payment Card */}
             <div className="glass-panel" style={{ padding: 'var(--space-lg)', position: 'relative', overflow: 'hidden' }}>
@@ -36,7 +36,7 @@ export function SummaryCards({ summary }: SummaryCardsProps) {
             </div>
 
             {/* Payoff Date Card */}
-            <div className="glass-panel" style={{ padding: 'var(--space-lg)', display: 'flex', alignItems: 'center', gap: 'var(--space-md)' }}>
+            <div className="glass-panel" style={{ minHeight: '100%', padding: 'var(--space-lg)', display: 'flex', alignItems: 'center', gap: 'var(--space-md)' }}>
                 <div style={{ padding: '12px', background: 'rgba(255,255,255,0.05)', borderRadius: '50%' }}>
                     <Calendar size={24} className="text-muted" />
                 </div>
@@ -51,7 +51,7 @@ export function SummaryCards({ summary }: SummaryCardsProps) {
 
             {/* Savings Card (shown only if there are savings >= $1) */}
             {Math.round(summary.interestSaved) >= 1 && (
-                <div className="glass-panel" style={{ padding: 'var(--space-lg)', display: 'flex', alignItems: 'center', gap: 'var(--space-md)', borderColor: 'var(--accent-primary)', background: 'var(--bg-card-hover)' }}>
+                <div className="glass-panel" style={{ minHeight: '100%', padding: 'var(--space-lg)', display: 'flex', alignItems: 'center', gap: 'var(--space-md)', borderColor: 'var(--accent-primary)', background: 'var(--bg-card-hover)' }}>
                     <div style={{ padding: '12px', background: 'var(--accent-glow)', borderRadius: '50%' }}>
                         <ArrowDownRight size={24} color="var(--accent-primary)" />
                     </div>
@@ -67,10 +67,11 @@ export function SummaryCards({ summary }: SummaryCardsProps) {
                         )}
                     </div>
                 </div>
-            )}
+            )
+            }
 
             {/* Total Cost Card */}
-            <div className="glass-panel" style={{ gridColumn: '1 / -1', padding: 'var(--space-lg)', position: 'relative', textAlign: 'center', background: 'var(--bg-card-hover)', borderColor: 'var(--accent-secondary)' }}>
+            <div className={`glass-panel ${Math.round(summary.interestSaved) >= 1 ? 'grid-total-span-half' : 'grid-total-span-full'}`} style={{ padding: 'var(--space-lg)', position: 'relative', textAlign: 'center', background: 'var(--bg-card-hover)', borderColor: 'var(--accent-secondary)' }}>
                 <h3 className="text-muted" style={{ fontSize: '1.1rem', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>
                     Total Cost (All-In)
                     <Tooltip content="The total lifecycle cost of your home. This includes the original loan amount plus every dollar of interest paid over the life of the mortgage.">
@@ -82,6 +83,6 @@ export function SummaryCards({ summary }: SummaryCardsProps) {
                 </div>
             </div>
 
-        </div>
+        </div >
     );
 }

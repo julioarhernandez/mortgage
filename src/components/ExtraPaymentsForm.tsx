@@ -123,7 +123,7 @@ export function ExtraPaymentsForm({ input, onChange, enabled, onToggleEnabled }:
                     {!isAdding ? (
                         <button
                             className="btn"
-                            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '12px', background: 'var(--bg-card-hover)', border: '1px dashed var(--border-color)', width: '100%', cursor: 'pointer' }}
+                            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '12px', background: 'var(--btn-bg)', border: '1px dashed var(--border-color)', width: '100%', cursor: 'pointer' }}
                             onClick={() => setIsAdding(true)}
                         >
                             <Plus size={18} /> Add Payment Rule

@@ -363,7 +363,7 @@ export function ExternalStrategyForm({ externalLoan, onChange, enabled, onToggle
                                 {!isAdding ? (
                                     <button
                                         className="btn"
-                                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '12px', background: 'var(--bg-card-hover)', border: '1px dashed var(--border-color)', width: '100%', cursor: 'pointer', color: 'var(--text-main)' }}
+                                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '12px', background: 'var(--btn-bg)', border: '1px dashed var(--border-color)', width: '100%', cursor: 'pointer', color: 'var(--text-main)' }}
                                         onClick={() => setIsAdding(true)}
                                     >
                                         <Plus size={18} /> Add Payment Rule
