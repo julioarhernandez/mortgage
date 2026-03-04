@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { MortgageInput } from '../utils/mortgage';
-import { DollarSign, Percent, Calendar, ShieldCheck } from 'lucide-react';
+import { DollarSign, Percent, Calendar, ShieldCheck, Info } from 'lucide-react';
+import { Tooltip } from './Tooltip';
 
 const MONTHS = [
     { value: 1, label: 'Jan' }, { value: 2, label: 'Feb' }, { value: 3, label: 'Mar' },
@@ -181,7 +182,12 @@ export function CalculatorForm({ input, onChange }: CalculatorFormProps) {
                                 </div>
                             </div>
                             <div className="input-group" style={{ flex: 1 }}>
-                                <label>PMI (Monthly)</label>
+                                <label style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                    PMI (Monthly)
+                                    <Tooltip content="Find this on your mortgage statement under 'Escrow' or 'Breakdown of Payments'. It may be listed as 'Mortgage Insurance'.">
+                                        <Info size={14} style={{ cursor: 'help', color: 'var(--accent-primary)' }} />
+                                    </Tooltip>
+                                </label>
                                 <div className="input-wrapper">
                                     <DollarSign className="prefix" size={16} />
                                     <input
