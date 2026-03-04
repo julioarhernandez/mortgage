@@ -17,7 +17,7 @@ export function SummaryCards({ summary }: SummaryCardsProps) {
         <div className="grid grid-cols-1-3" style={{ gap: 'var(--space-md)' }}>
 
             {/* Monthly Payment Card */}
-            <div className="glass-panel" style={{ padding: 'var(--space-lg)', position: 'relative' }}>
+            <div className="glass-panel" style={{ padding: 'var(--space-lg)', position: 'relative', overflow: 'hidden' }}>
                 <div style={{ position: 'absolute', top: -20, right: -20, opacity: 0.1 }}>
                     <DollarSign size={100} />
                 </div>
@@ -35,7 +35,7 @@ export function SummaryCards({ summary }: SummaryCardsProps) {
             </div>
 
             {/* Total Interest Card */}
-            <div className="glass-panel" style={{ padding: 'var(--space-lg)', position: 'relative' }}>
+            <div className="glass-panel" style={{ padding: 'var(--space-lg)', position: 'relative', overflow: 'hidden' }}>
                 <h3 className="text-muted" style={{ fontSize: '1rem', fontWeight: 500 }}>Total Interest Paid</h3>
                 <div className="text-value" style={{ marginTop: 'var(--space-sm)', color: 'var(--color-warning)' }}>
                     {formatCurrency(summary.totalInterest)}
