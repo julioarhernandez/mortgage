@@ -247,7 +247,7 @@ export function ExternalStrategyForm({ externalLoan, onChange, enabled, onToggle
                     {/* Extra Payments Section (Design Parity with Base Extra Payments) */}
                     <div className="col-span-full" style={{
                         marginTop: 'var(--space-md)',
-                        padding: 'var(--space-xl)',
+                        padding: 'var(--space-md)',
                         background: 'rgba(255,255,255,0.01)',
                         border: '1px solid',
                         borderColor: externalLoan.extraPaymentsEnabled ? 'var(--accent-primary)' : 'var(--border-color)',
@@ -369,7 +369,7 @@ export function ExternalStrategyForm({ externalLoan, onChange, enabled, onToggle
                                         <Plus size={18} /> Add Payment Rule
                                     </button>
                                 ) : (
-                                    <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', padding: 'var(--space-lg)', display: 'flex', flexDirection: 'column', gap: 'var(--space-md)', animation: 'fadeIn 0.2s ease' }}>
+                                    <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', padding: 'var(--space-md)', display: 'flex', flexDirection: 'column', gap: 'var(--space-md)', animation: 'fadeIn 0.2s ease' }}>
                                         <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-sm)' }}>
                                             <h4 style={{ margin: 0, fontSize: '1rem' }}>New Payment Rule</h4>
                                             {externalLoan.isInterestOnly && (
