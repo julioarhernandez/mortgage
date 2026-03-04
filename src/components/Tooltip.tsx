@@ -9,8 +9,16 @@ interface TooltipProps {
 export function Tooltip({ children, content }: TooltipProps) {
     const [active, setActive] = useState(false);
     const [coords, setCoords] = useState({ top: 0, left: 0, arrowLeft: '50%' });
+    const [isMeasured, setIsMeasured] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
     const tooltipRef = useRef<HTMLDivElement>(null);
+
+    // Reset measurement when tooltip is closed
+    useEffect(() => {
+        if (!active) {
+            setIsMeasured(false);
+        }
+    }, [active]);
 
     // Calculate position whenever active changes
     useLayoutEffect(() => {
@@ -34,7 +42,6 @@ export function Tooltip({ children, content }: TooltipProps) {
         if (left - halfWidth < padding) {
             // Off left edge
             adjustedLeft = halfWidth + padding;
-            // Calculate arrow offset relative to the new adjusted left
             const delta = left - adjustedLeft;
             arrowOffset = 50 + (delta / tooltipRect.width * 100);
         } else if (left + halfWidth > viewportWidth - padding) {
@@ -49,6 +56,9 @@ export function Tooltip({ children, content }: TooltipProps) {
             left: adjustedLeft,
             arrowLeft: `${Math.max(10, Math.min(90, arrowOffset))}%`
         });
+
+        // Use a small timeout or just double-check measurement to ensure paint
+        setIsMeasured(true);
     }, [active]);
 
     // Handle clicks outside to close the tooltip (for mobile)
@@ -87,15 +97,15 @@ export function Tooltip({ children, content }: TooltipProps) {
             {active && createPortal(
                 <div
                     ref={tooltipRef}
-                    className="tooltip-box portal"
+                    className={`tooltip-box portal ${isMeasured ? 'ready' : ''}`}
                     style={{
                         position: 'absolute',
                         top: coords.top,
                         left: coords.left,
                         transform: 'translateX(-50%) translateY(-100%)',
-                        pointerEvents: 'auto',
-                        opacity: 1,
-                        visibility: 'visible'
+                        pointerEvents: isMeasured ? 'auto' : 'none',
+                        opacity: isMeasured ? 1 : 0,
+                        visibility: isMeasured ? 'visible' : 'hidden'
                     }}
                 >
                     {content}
