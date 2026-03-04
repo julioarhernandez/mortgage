@@ -383,3 +383,17 @@ tr:hover td {
     }
 }
 
+@media (max-width: 768px) {
+  .mobile-center {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center !important;
+    justify-content: center !important;
+  }
+  .flex-mobile-stack {
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center !important;
+  }
+}

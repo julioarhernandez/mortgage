@@ -16,7 +16,7 @@ export function ArbitrageSummaryCard({ arbitrage }: ArbitrageSummaryProps) {
 
     return (
         <div className="glass-panel" style={{ padding: 'var(--space-lg)', marginTop: 'var(--space-lg)', borderColor: mainColor, background: bgColor }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-md)', marginBottom: 'var(--space-md)' }}>
+            <div className="flex-mobile-stack" style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-md)', marginBottom: 'var(--space-md)' }}>
                 <div style={{ padding: '12px', background: isProfitable ? 'var(--accent-glow)' : 'rgba(239, 68, 68, 0.2)', borderRadius: '50%' }}>
                     {isProfitable ? <CheckCircle size={32} color={mainColor} /> : <XCircle size={32} color={mainColor} />}
                 </div>
@@ -33,40 +33,40 @@ export function ArbitrageSummaryCard({ arbitrage }: ArbitrageSummaryProps) {
             </div>
 
             <div className="grid grid-cols-2" style={{ gap: 'var(--space-md)', marginTop: 'var(--space-lg)' }}>
-                <div style={{ padding: 'var(--space-md)', background: 'rgba(0,0,0,0.2)', borderRadius: 'var(--radius-md)' }}>
-                    <div className="text-muted" style={{ fontSize: '0.85rem' }}>Mortgage Interest Saved</div>
-                    <div style={{ fontSize: '1.25rem', fontWeight: 600, color: 'var(--accent-primary)' }}>
+                <div className="mobile-center" style={{ padding: 'var(--space-md)', background: 'rgba(0,0,0,0.2)', borderRadius: 'var(--radius-md)' }}>
+                    <div className="text-muted mobile-center" style={{ fontSize: '0.85rem' }}>Mortgage Interest Saved</div>
+                    <div className="mobile-center" style={{ fontSize: '1.25rem', fontWeight: 600, color: 'var(--accent-primary)' }}>
                         {formatCurrency(arbitrage.mortgageInterestSaved)}
                     </div>
                 </div>
 
-                <div style={{ padding: 'var(--space-md)', background: 'rgba(0,0,0,0.2)', borderRadius: 'var(--radius-md)' }}>
-                    <div className="text-muted" style={{ fontSize: '0.85rem' }}>Total External Interest</div>
-                    <div style={{ fontSize: '1.25rem', fontWeight: 600, color: 'var(--color-danger)' }}>
+                <div className="mobile-center" style={{ padding: 'var(--space-md)', background: 'rgba(0,0,0,0.2)', borderRadius: 'var(--radius-md)' }}>
+                    <div className="text-muted mobile-center" style={{ fontSize: '0.85rem' }}>Total External Interest</div>
+                    <div className="mobile-center" style={{ fontSize: '1.25rem', fontWeight: 600, color: 'var(--color-danger)' }}>
                         -{formatCurrency(arbitrage.externalTotalInterest)}
                     </div>
                     {(!arbitrage.repaymentMonthlyPayment || arbitrage.repaymentMonthlyPayment === 0) && (
-                        <div className="text-muted" style={{ fontSize: '0.75rem' }}>
+                        <div className="text-muted mobile-center" style={{ fontSize: '0.75rem' }}>
                             ({formatCurrency(arbitrage.externalMonthlyPayment)}/mo)
                         </div>
                     )}
                 </div>
 
-                <div style={{ padding: 'var(--space-md)', background: 'rgba(0,0,0,0.2)', borderRadius: 'var(--radius-md)' }}>
-                    <div className="text-muted" style={{ fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <div className="mobile-center" style={{ padding: 'var(--space-md)', background: 'rgba(0,0,0,0.2)', borderRadius: 'var(--radius-md)' }}>
+                    <div className="text-muted mobile-center" style={{ fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '4px' }}>
                         Total Cost (All-In)
                         <Tooltip content="Sum of every dollar spent to reach $0 debt: (Mortgage Payments) + (External Loan Interest) + (External Loan Principal Repayment).">
                             <Info size={12} style={{ cursor: 'help', color: 'var(--accent-primary)' }} />
                         </Tooltip>
                     </div>
-                    <div style={{ fontSize: '1.25rem', fontWeight: 600 }}>
+                    <div className="mobile-center" style={{ fontSize: '1.25rem', fontWeight: 600 }}>
                         {formatCurrency(arbitrage.newTotalPayment)}
                     </div>
                 </div>
 
-                <div style={{ padding: 'var(--space-md)', background: 'rgba(0,0,0,0.2)', borderRadius: 'var(--radius-md)' }}>
-                    <div className="text-muted" style={{ fontSize: '0.85rem' }}>New Payoff Date</div>
-                    <div style={{ fontSize: '1.25rem', fontWeight: 600, color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <div className="mobile-center" style={{ padding: 'var(--space-md)', background: 'rgba(0,0,0,0.2)', borderRadius: 'var(--radius-md)' }}>
+                    <div className="text-muted mobile-center" style={{ fontSize: '0.85rem' }}>New Payoff Date</div>
+                    <div className="mobile-center" style={{ fontSize: '1.25rem', fontWeight: 600, color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '8px' }}>
                         {arbitrage.newPayoffDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
                         {arbitrage.monthsSaved > 0 && (
                             <span style={{ fontSize: '0.8rem', color: 'var(--accent-primary)', background: 'var(--accent-glow)', padding: '2px 8px', borderRadius: '12px' }}>
@@ -75,7 +75,7 @@ export function ArbitrageSummaryCard({ arbitrage }: ArbitrageSummaryProps) {
                         )}
                     </div>
                     {arbitrage.monthsSaved > 0 && (
-                        <div className="text-muted" style={{ fontSize: '0.75rem', marginTop: '4px' }}>
+                        <div className="text-muted mobile-center" style={{ fontSize: '0.75rem', marginTop: '4px' }}>
                             Original payoff: {arbitrage.baselinePayoffDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
                         </div>
                     )}
@@ -87,14 +87,14 @@ export function ArbitrageSummaryCard({ arbitrage }: ArbitrageSummaryProps) {
                         <div className="col-span-full" style={{ marginTop: 'var(--space-md)', fontWeight: 600, color: 'var(--text-main)', fontSize: '1.1rem', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '8px' }}>
                             Draw Period (Interest-Only)
                         </div>
-                        <div style={{ padding: 'var(--space-md)', background: 'rgba(0,0,0,0.2)', borderRadius: 'var(--radius-md)' }}>
+                        <div className="mobile-center" style={{ padding: 'var(--space-md)', background: 'rgba(0,0,0,0.2)', borderRadius: 'var(--radius-md)' }}>
                             <div className="text-muted" style={{ fontSize: '0.85rem' }}>Draw Monthly Payment</div>
                             <div style={{ fontSize: '1.25rem', fontWeight: 600 }}>
                                 {formatCurrency(arbitrage.externalMonthlyPayment)}
                             </div>
                         </div>
 
-                        <div style={{ padding: 'var(--space-md)', background: 'rgba(0,0,0,0.2)', borderRadius: 'var(--radius-md)' }}>
+                        <div className="mobile-center" style={{ padding: 'var(--space-md)', background: 'rgba(0,0,0,0.2)', borderRadius: 'var(--radius-md)' }}>
                             <div className="text-muted" style={{ fontSize: '0.85rem' }}>Draw Phase Interest</div>
                             <div style={{ fontSize: '1.25rem', fontWeight: 600, color: 'var(--color-danger)' }}>
                                 {formatCurrency(arbitrage.interestDuringDraw || 0)}
@@ -105,14 +105,14 @@ export function ArbitrageSummaryCard({ arbitrage }: ArbitrageSummaryProps) {
                         <div className="col-span-full" style={{ marginTop: 'var(--space-sm)', fontWeight: 600, color: 'var(--text-main)', fontSize: '1.1rem', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '8px' }}>
                             Repayment Period (Amortized)
                         </div>
-                        <div style={{ padding: 'var(--space-md)', background: 'rgba(var(--accent-primary-rgb), 0.1)', borderRadius: 'var(--radius-md)', border: '1px solid rgba(var(--accent-primary-rgb), 0.2)' }}>
+                        <div className="mobile-center" style={{ padding: 'var(--space-md)', background: 'rgba(0,0,0,0.2)', borderRadius: 'var(--radius-md)', border: '1px solid rgba(var(--accent-primary-rgb), 0.2)' }}>
                             <div className="text-muted" style={{ fontSize: '0.85rem' }}>Repayment Monthly Pmt</div>
                             <div style={{ fontSize: '1.25rem', fontWeight: 600 }}>
                                 {formatCurrency(arbitrage.repaymentMonthlyPayment)}
                             </div>
                         </div>
 
-                        <div style={{ padding: 'var(--space-md)', background: 'rgba(var(--accent-primary-rgb), 0.1)', borderRadius: 'var(--radius-md)', border: '1px solid rgba(var(--accent-primary-rgb), 0.2)' }}>
+                        <div className="mobile-center" style={{ padding: 'var(--space-md)', background: 'rgba(0,0,0,0.2)', borderRadius: 'var(--radius-md)', border: '1px solid rgba(var(--accent-primary-rgb), 0.2)' }}>
                             <div className="text-muted" style={{ fontSize: '0.85rem' }}>Repay Phase Interest</div>
                             <div style={{ fontSize: '1.25rem', fontWeight: 600, color: 'var(--color-danger)' }}>
                                 {formatCurrency(arbitrage.interestDuringRepayment || 0)}

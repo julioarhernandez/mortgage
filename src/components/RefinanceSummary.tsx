@@ -19,7 +19,7 @@ export function RefinanceSummaryCard({ summary }: RefinanceSummaryCardProps) {
 
     return (
         <div className="glass-panel" style={{ padding: 'var(--space-lg)', marginTop: 'var(--space-lg)', borderColor: mainColor, background: bgColor }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-md)', marginBottom: 'var(--space-md)' }}>
+            <div className="flex-mobile-stack" style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-md)', marginBottom: 'var(--space-md)' }}>
                 <div style={{ padding: '12px', background: isProfitable ? 'var(--accent-glow)' : 'rgba(239, 68, 68, 0.2)', borderRadius: '50%' }}>
                     {isProfitable ? <CheckCircle size={32} color={mainColor} /> : <XCircle size={32} color={mainColor} />}
                 </div>
@@ -36,53 +36,53 @@ export function RefinanceSummaryCard({ summary }: RefinanceSummaryCardProps) {
             </div>
 
             <div className="grid grid-cols-3" style={{ gap: 'var(--space-md)', marginTop: 'var(--space-lg)' }}>
-                <div style={{ padding: 'var(--space-md)', background: 'rgba(0,0,0,0.2)', borderRadius: 'var(--radius-md)' }}>
-                    <div className="text-muted" style={{ fontSize: '0.85rem' }}>Interest Paid Before Refi</div>
-                    <div style={{ fontSize: '1.25rem', fontWeight: 600 }}>
+                <div className="mobile-center" style={{ padding: 'var(--space-md)', background: 'rgba(0,0,0,0.2)', borderRadius: 'var(--radius-md)' }}>
+                    <div className="text-muted mobile-center" style={{ fontSize: '0.85rem' }}>Interest Paid Before Refi</div>
+                    <div className="mobile-center" style={{ fontSize: '1.25rem', fontWeight: 600 }}>
                         {formatCurrency(summary.interestPaidBeforeRefinance)}
                     </div>
                 </div>
 
-                <div style={{ padding: 'var(--space-md)', background: 'rgba(0,0,0,0.2)', borderRadius: 'var(--radius-md)' }}>
-                    <div className="text-muted" style={{ fontSize: '0.85rem' }}>Principal Paid Before Refi</div>
-                    <div style={{ fontSize: '1.25rem', fontWeight: 600 }}>
+                <div className="mobile-center" style={{ padding: 'var(--space-md)', background: 'rgba(0,0,0,0.2)', borderRadius: 'var(--radius-md)' }}>
+                    <div className="text-muted mobile-center" style={{ fontSize: '0.85rem' }}>Principal Paid Before Refi</div>
+                    <div className="mobile-center" style={{ fontSize: '1.25rem', fontWeight: 600 }}>
                         {formatCurrency(summary.principalPaidBeforeRefinance)}
                     </div>
                 </div>
 
-                <div style={{ padding: 'var(--space-md)', background: 'rgba(0,0,0,0.2)', borderRadius: 'var(--radius-md)' }}>
-                    <div className="text-muted" style={{ fontSize: '0.85rem' }}>New Loan Balance</div>
-                    <div style={{ fontSize: '1.25rem', fontWeight: 600 }}>
+                <div className="mobile-center" style={{ padding: 'var(--space-md)', background: 'rgba(0,0,0,0.2)', borderRadius: 'var(--radius-md)' }}>
+                    <div className="text-muted mobile-center" style={{ fontSize: '0.85rem' }}>New Loan Balance</div>
+                    <div className="mobile-center" style={{ fontSize: '1.25rem', fontWeight: 600 }}>
                         {formatCurrency(summary.newLoanPrincipal)}
                     </div>
                 </div>
             </div>
 
             <div className="grid grid-cols-3" style={{ gap: 'var(--space-md)', marginTop: 'var(--space-md)' }}>
-                <div style={{ padding: 'var(--space-md)', background: 'rgba(0,0,0,0.2)', borderRadius: 'var(--radius-md)' }}>
-                    <div className="text-muted" style={{ fontSize: '0.85rem' }}>New Total Interest</div>
-                    <div style={{ fontSize: '1.25rem', fontWeight: 600 }}>
+                <div className="mobile-center" style={{ padding: 'var(--space-md)', background: 'rgba(0,0,0,0.2)', borderRadius: 'var(--radius-md)' }}>
+                    <div className="text-muted mobile-center" style={{ fontSize: '0.85rem' }}>New Total Interest</div>
+                    <div className="mobile-center" style={{ fontSize: '1.25rem', fontWeight: 600 }}>
                         {formatCurrency(summary.newTotalInterest)}
                     </div>
                 </div>
 
-                <div style={{ padding: 'var(--space-md)', background: 'rgba(0,0,0,0.2)', borderRadius: 'var(--radius-md)' }}>
-                    <div className="text-muted" style={{ fontSize: '0.85rem' }}>New Monthly Payment</div>
-                    <div style={{ fontSize: '1.25rem', fontWeight: 600 }}>
+                <div className="mobile-center" style={{ padding: 'var(--space-md)', background: 'rgba(0,0,0,0.2)', borderRadius: 'var(--radius-md)' }}>
+                    <div className="text-muted mobile-center" style={{ fontSize: '0.85rem' }}>New Monthly Payment</div>
+                    <div className="mobile-center" style={{ fontSize: '1.25rem', fontWeight: 600 }}>
                         {formatCurrency(summary.newMonthlyPayment)}
                     </div>
                 </div>
 
-                <div style={{ padding: 'var(--space-md)', background: 'rgba(0,0,0,0.2)', borderRadius: 'var(--radius-md)' }}>
-                    <div className="text-muted" style={{ fontSize: '0.85rem' }}>New Payoff Date</div>
-                    <div style={{ fontSize: '1.25rem', fontWeight: 600 }}>
+                <div className="mobile-center" style={{ padding: 'var(--space-md)', background: 'rgba(0,0,0,0.2)', borderRadius: 'var(--radius-md)' }}>
+                    <div className="text-muted mobile-center" style={{ fontSize: '0.85rem' }}>New Payoff Date</div>
+                    <div className="mobile-center" style={{ fontSize: '1.25rem', fontWeight: 600 }}>
                         {formatDate(summary.newPayoffDate)}
                     </div>
                 </div>
             </div>
 
             <div className="grid grid-cols-3" style={{ gap: 'var(--space-md)', marginTop: 'var(--space-md)' }}>
-                <div style={{ padding: 'var(--space-md)', background: 'rgba(0,0,0,0.2)', borderRadius: 'var(--radius-md)' }}>
+                <div className="mobile-center" style={{ padding: 'var(--space-md)', background: 'rgba(0,0,0,0.2)', borderRadius: 'var(--radius-md)' }}>
                     <div className="text-muted" style={{ fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '4px' }}>
                         Break-Even Point
                         <Tooltip content="The time required for your lower monthly payments to pay back the cost of the refinance. If you move before this, you may lose money.">
@@ -94,7 +94,7 @@ export function RefinanceSummaryCard({ summary }: RefinanceSummaryCardProps) {
                     </div>
                 </div>
 
-                <div style={{ padding: 'var(--space-md)', background: 'rgba(0,0,0,0.2)', borderRadius: 'var(--radius-md)' }}>
+                <div className="mobile-center" style={{ padding: 'var(--space-md)', background: 'rgba(0,0,0,0.2)', borderRadius: 'var(--radius-md)' }}>
                     <div className="text-muted" style={{ fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '4px' }}>
                         Baseline Total Cost
                         <Tooltip content="The 'Stay the Course' number. The total amount you will have paid for your home from start to finish if you do not refinance.">
@@ -106,7 +106,7 @@ export function RefinanceSummaryCard({ summary }: RefinanceSummaryCardProps) {
                     </div>
                 </div>
 
-                <div style={{ padding: 'var(--space-md)', background: isProfitable ? 'var(--accent-glow)' : 'rgba(239, 68, 68, 0.1)', border: `1px solid ${mainColor}`, borderRadius: 'var(--radius-md)' }}>
+                <div className="mobile-center" style={{ padding: 'var(--space-md)', background: isProfitable ? 'var(--accent-glow)' : 'rgba(239, 68, 68, 0.1)', border: `1px solid ${mainColor}`, borderRadius: 'var(--radius-md)' }}>
                     <div className="text-muted" style={{ fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '4px' }}>
                         Total Cost (All-In)
                         <Tooltip content="The 'New Path' number. Includes everything: interest paid so far, closing costs (if any), and the entire cost of the new loan until payoff.">
