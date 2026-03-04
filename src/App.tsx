@@ -22,7 +22,11 @@ function App() {
       extraMonthlyPayment: 0,
       extraYearlyPayment: 0,
       oneTimePayment: 0,
-      oneTimePaymentMonth: 12
+      oneTimePaymentMonth: 12,
+      propertyTax: 3600,
+      homeInsurance: 1200,
+      pmi: 0,
+      monthlyCostsEnabled: false
     };
   });
 

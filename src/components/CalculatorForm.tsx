@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { MortgageInput } from '../utils/mortgage';
-import { DollarSign, Percent, Calendar } from 'lucide-react';
+import { DollarSign, Percent, Calendar, ShieldCheck } from 'lucide-react';
 
 const MONTHS = [
     { value: 1, label: 'Jan' }, { value: 2, label: 'Feb' }, { value: 3, label: 'Mar' },
@@ -115,8 +115,87 @@ export function CalculatorForm({ input, onChange }: CalculatorFormProps) {
                 </div>
             </div>
 
+            {/* Monthly Costs Subsection */}
+            <div style={{
+                marginTop: 'var(--space-md)',
+                paddingTop: 'var(--space-md)',
+                borderTop: '1px solid var(--border-color)',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 'var(--space-md)'
+            }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <h3 style={{ fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <ShieldCheck size={20} className="text-muted" style={{ color: input.monthlyCostsEnabled ? 'var(--accent-primary)' : 'inherit' }} />
+                        Monthly Costs (T&I)
+                    </h3>
+                    <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', gap: '8px' }}>
+                        <span style={{ fontSize: '0.8rem', color: input.monthlyCostsEnabled ? 'var(--accent-primary)' : 'var(--text-muted)' }}>
+                            {input.monthlyCostsEnabled ? 'Included' : 'Include'}
+                        </span>
+                        <input
+                            type="checkbox"
+                            checked={input.monthlyCostsEnabled}
+                            onChange={(e) => handleChange('monthlyCostsEnabled', e.target.checked as any)}
+                            style={{ width: '16px', height: '16px', accentColor: 'var(--accent-primary)' }}
+                        />
+                    </label>
+                </div>
 
+                <p className="text-muted" style={{ fontSize: '0.85rem', marginBottom: 'var(--space-sm)' }}>
+                    Accurately calculate your real monthly budget by including property taxes, homeowners insurance, and private mortgage insurance (PMI).
+                </p>
 
+                {input.monthlyCostsEnabled && (
+                    <div style={{ animation: 'fadeIn 0.3s ease', display: 'flex', flexDirection: 'column', gap: 'var(--space-md)' }}>
+                        <div className="input-group">
+                            <label>Property Tax (Yearly)</label>
+                            <div className="input-wrapper">
+                                <DollarSign className="prefix" size={16} />
+                                <input
+                                    type="number"
+                                    className="has-prefix"
+                                    value={input.propertyTax || ''}
+                                    onChange={(e) => handleChange('propertyTax', Number(e.target.value))}
+                                />
+                            </div>
+                            <input
+                                type="range"
+                                min="0" max="20000" step="100"
+                                value={input.propertyTax || 0}
+                                onChange={(e) => handleChange('propertyTax', Number(e.target.value))}
+                            />
+                        </div>
+
+                        <div className="flex gap-4">
+                            <div className="input-group" style={{ flex: 1 }}>
+                                <label>Insurance (Yearly)</label>
+                                <div className="input-wrapper">
+                                    <DollarSign className="prefix" size={16} />
+                                    <input
+                                        type="number"
+                                        className="has-prefix"
+                                        value={input.homeInsurance || ''}
+                                        onChange={(e) => handleChange('homeInsurance', Number(e.target.value))}
+                                    />
+                                </div>
+                            </div>
+                            <div className="input-group" style={{ flex: 1 }}>
+                                <label>PMI (Monthly)</label>
+                                <div className="input-wrapper">
+                                    <DollarSign className="prefix" size={16} />
+                                    <input
+                                        type="number"
+                                        className="has-prefix"
+                                        value={input.pmi || ''}
+                                        onChange={(e) => handleChange('pmi', Number(e.target.value))}
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+            </div>
         </div>
     );
 }

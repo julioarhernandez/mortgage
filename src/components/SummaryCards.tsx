@@ -14,21 +14,28 @@ export function SummaryCards({ summary }: SummaryCardsProps) {
         new Intl.DateTimeFormat('en-US', { month: 'short', year: 'numeric' }).format(date);
 
     return (
-        <div className="grid grid-cols-2-3" style={{ gap: 'var(--space-md)' }}>
+        <div className="grid grid-cols-1-3" style={{ gap: 'var(--space-md)' }}>
 
             {/* Monthly Payment Card */}
-            <div className="glass-panel" style={{ padding: 'var(--space-lg)', position: 'relative', overflow: 'hidden' }}>
+            <div className="glass-panel" style={{ padding: 'var(--space-lg)', position: 'relative' }}>
                 <div style={{ position: 'absolute', top: -20, right: -20, opacity: 0.1 }}>
                     <DollarSign size={100} />
                 </div>
-                <h3 className="text-muted" style={{ fontSize: '1rem', fontWeight: 500 }}>Base Monthly Payment</h3>
+                <h3 className="text-muted" style={{ fontSize: '1rem', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    {summary.realMonthlyPayment !== summary.monthlyPayment ? 'Total Monthly Payment' : 'Base Monthly Payment'}
+                    {summary.realMonthlyPayment !== summary.monthlyPayment && (
+                        <Tooltip content={`P&I: ${formatCurrency(summary.monthlyPayment)} + T&I/PMI: ${formatCurrency(summary.realMonthlyPayment - summary.monthlyPayment)}`}>
+                            <Info size={14} style={{ cursor: 'help', color: 'var(--accent-primary)' }} />
+                        </Tooltip>
+                    )}
+                </h3>
                 <div className="text-value text-gradient" style={{ marginTop: 'var(--space-sm)' }}>
-                    {formatCurrency(summary.monthlyPayment)}
+                    {formatCurrency(summary.realMonthlyPayment)}
                 </div>
             </div>
 
             {/* Total Interest Card */}
-            <div className="glass-panel" style={{ padding: 'var(--space-lg)', position: 'relative', overflow: 'hidden' }}>
+            <div className="glass-panel" style={{ padding: 'var(--space-lg)', position: 'relative' }}>
                 <h3 className="text-muted" style={{ fontSize: '1rem', fontWeight: 500 }}>Total Interest Paid</h3>
                 <div className="text-value" style={{ marginTop: 'var(--space-sm)', color: 'var(--color-warning)' }}>
                     {formatCurrency(summary.totalInterest)}

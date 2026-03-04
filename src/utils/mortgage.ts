@@ -22,6 +22,11 @@ export interface MortgageInput {
     oneTimePaymentMonth?: number;
     // Dynamic schedules
     paymentSchedule?: PaymentRule[];
+    // Monthly Costs
+    propertyTax?: number;
+    homeInsurance?: number;
+    pmi?: number;
+    monthlyCostsEnabled?: boolean;
 }
 
 export interface AmortizationRow {
@@ -44,6 +49,7 @@ export interface MortgageSummary {
     schedule: AmortizationRow[];
     interestSaved: number; // compared to normal amortization
     monthsSaved: number;
+    realMonthlyPayment: number;
 }
 
 /**
@@ -68,7 +74,11 @@ export function calculateAmortization(input: MortgageInput, overrideBaseDate?: D
         extraMonthlyPayment = 0,
         extraYearlyPayment = 0,
         oneTimePayment = 0,
-        oneTimePaymentMonth = 0
+        oneTimePaymentMonth = 0,
+        propertyTax = 0,
+        homeInsurance = 0,
+        pmi = 0,
+        monthlyCostsEnabled = false
     } = input;
 
     let accumulatedInterest = 0;
@@ -183,7 +193,10 @@ export function calculateAmortization(input: MortgageInput, overrideBaseDate?: D
         totalMonths: schedule.length,
         payoffDate,
         interestSaved: standardTotalInterest - accumulatedInterest,
-        monthsSaved: standardMonths - schedule.length
+        monthsSaved: standardMonths - schedule.length,
+        realMonthlyPayment: monthlyCostsEnabled
+            ? standardMonthlyPayment + (propertyTax / 12) + (homeInsurance / 12) + pmi
+            : standardMonthlyPayment
     };
 }
 
