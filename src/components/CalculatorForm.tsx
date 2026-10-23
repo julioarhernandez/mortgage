@@ -241,6 +241,12 @@ export function CalculatorForm({ input, onChange }: CalculatorFormProps) {
                                         onChange={(e) => handleChange('homeInsurance', Number(e.target.value))}
                                     />
                                 </div>
+                                <input
+                                    type="range"
+                                    min="0" max="10000" step="100"
+                                    value={input.homeInsurance || 0}
+                                    onChange={(e) => handleChange('homeInsurance', Number(e.target.value))}
+                                />
                             </div>
                             <div className="input-group" style={{ opacity: pmiRequired ? 1 : 0.5 }}>
                                 <label style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>

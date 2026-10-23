@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useDeferredValue } from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { calculateAmortization, calculateArbitrage, calculateRefinance, getLoanAmount, getMonthlyPmi, type MortgageInput, type ExternalLoanInput, type RefinanceInput } from './utils/mortgage';
 import { CalculatorForm } from './components/CalculatorForm';
@@ -124,14 +124,18 @@ function App() {
     localStorage.setItem('mortgage-graph-expanded', JSON.stringify(isGraphExpanded));
   }, [isGraphExpanded]);
 
+  // Slider drags update `input` immediately; the heavy amortization math uses this deferred copy
+  // so React can keep the inputs responsive and recalculate in the background.
+  const deferredInput = useDeferredValue(input);
+
   const baseCalculatedInput = useMemo(() => {
-    // Loan amount after the down payment (if it is part of the principal)
-    const activeInput = { ...input, principal: getLoanAmount(input), pmi: getMonthlyPmi(input) };
+    // Loan amount after the down payment, and PMI for the current down payment
+    const activeInput = { ...deferredInput, principal: getLoanAmount(deferredInput), pmi: getMonthlyPmi(deferredInput) };
     if (!extraPaymentsEnabled) {
       activeInput.paymentSchedule = [];
     }
     return activeInput;
-  }, [input, extraPaymentsEnabled]);
+  }, [deferredInput, extraPaymentsEnabled]);
 
   const summary = useMemo(() => {
     return calculateAmortization(baseCalculatedInput);
