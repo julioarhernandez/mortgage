@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
-import { calculateAmortization, calculateArbitrage, calculateRefinance, type MortgageInput, type ExternalLoanInput, type RefinanceInput } from './utils/mortgage';
+import { calculateAmortization, calculateArbitrage, calculateRefinance, getLoanAmount, getMonthlyPmi, type MortgageInput, type ExternalLoanInput, type RefinanceInput } from './utils/mortgage';
 import { CalculatorForm } from './components/CalculatorForm';
 import { ExtraPaymentsForm } from './components/ExtraPaymentsForm';
 import { SummaryCards } from './components/SummaryCards';
@@ -15,7 +15,12 @@ import './index.css';
 function App() {
   const [input, setInput] = useState<MortgageInput>(() => {
     const saved = localStorage.getItem('mortgage-input');
-    return saved ? JSON.parse(saved) : {
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      // Saved before the PMI % / $ toggle existed: use the new PMI default instead of the old 0
+      return parsed.pmiIsPercent === undefined ? { ...parsed, pmi: 0.5, pmiIsPercent: true } : parsed;
+    }
+    return {
       principal: 300000,
       annualInterestRate: 5.5,
       years: 30,
@@ -25,7 +30,17 @@ function App() {
       oneTimePaymentMonth: 12,
       propertyTax: 3600,
       homeInsurance: 1200,
-      pmi: 0,
+      pmi: 0.5,
+      pmiIsPercent: true,
+      water: 0,
+      electricity: 0,
+      gas: 0,
+      trashSewer: 0,
+      hoaDues: 0,
+      internet: 0,
+      downPayment: 0,
+      downPaymentIsPercent: false,
+      downPaymentInPrincipal: false,
       monthlyCostsEnabled: false
     };
   });
@@ -111,7 +126,8 @@ function App() {
   }, [isGraphExpanded]);
 
   const baseCalculatedInput = useMemo(() => {
-    const activeInput = { ...input };
+    // Loan amount after the down payment (if it is part of the principal)
+    const activeInput = { ...input, principal: getLoanAmount(input), pmi: getMonthlyPmi(input) };
     if (!extraPaymentsEnabled) {
       activeInput.paymentSchedule = [];
     }

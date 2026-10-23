@@ -24,7 +24,7 @@ export function SummaryCards({ summary }: SummaryCardsProps) {
                 <h3 className="text-muted" style={{ fontSize: '1rem', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '6px' }}>
                     {summary.realMonthlyPayment !== summary.monthlyPayment ? 'Total Monthly Payment' : 'Base Monthly Payment'}
                     {summary.realMonthlyPayment !== summary.monthlyPayment && (
-                        <Tooltip content={`P&I: ${formatCurrency(summary.monthlyPayment)} + T&I/PMI: ${formatCurrency(summary.realMonthlyPayment - summary.monthlyPayment)}`}>
+                        <Tooltip content={`P&I: ${formatCurrency(summary.monthlyPayment)} + Monthly Costs:${formatCurrency(summary.realMonthlyPayment - summary.monthlyPayment)}`}>
                             <Info size={14} style={{ cursor: 'help', color: 'var(--accent-primary)' }} />
                         </Tooltip>
                     )}

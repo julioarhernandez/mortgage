@@ -15,6 +15,10 @@ export interface MortgageInput {
     startMonth?: number;
     startYear?: number;
     startDate?: Date; // Used to base the amortization calendar
+    // Down payment
+    downPayment?: number; // Entered as a percent or an amount, see downPaymentIsPercent
+    downPaymentIsPercent?: boolean; // true = percent of the home price (principal), false = dollar amount
+    downPaymentInPrincipal?: boolean; // true = down payment is subtracted from the home price to get the loan
     // Legacy / simple fields (used by programmatic strategies like arbitrage)
     extraMonthlyPayment?: number;
     extraYearlyPayment?: number;
@@ -25,7 +29,15 @@ export interface MortgageInput {
     // Monthly Costs
     propertyTax?: number;
     homeInsurance?: number;
-    pmi?: number;
+    pmi?: number; // PMI value, either an annual % of the loan or a monthly $ amount (see pmiIsPercent)
+    pmiIsPercent?: boolean; // true = annual % of the loan, false = monthly dollars
+    // Recurring monthly household costs (entered per month)
+    water?: number;
+    electricity?: number;
+    gas?: number;
+    trashSewer?: number;
+    hoaDues?: number;
+    internet?: number;
     monthlyCostsEnabled?: boolean;
 }
 
@@ -64,6 +76,44 @@ export function calculateMonthlyPayment(principal: number, annualInterestRate: n
 }
 
 /**
+ * Dollar value of the down payment. Percentages are applied to the home price (principal field).
+ */
+export function getDownPaymentAmount(input: MortgageInput): number {
+    const dp = input.downPayment || 0;
+    return input.downPaymentIsPercent ? (input.principal * dp) / 100 : dp;
+}
+
+/**
+ * Loan amount actually borrowed. Only reduced by the down payment when it is part of the principal.
+ */
+export function getLoanAmount(input: MortgageInput): number {
+    if (!input.downPaymentInPrincipal) return input.principal;
+    return Math.max(0, input.principal - getDownPaymentAmount(input));
+}
+
+/**
+ * PMI only applies when the loan is over 80% of the home price (down payment under 20%).
+ */
+export function isPmiRequired(input: MortgageInput): boolean {
+    const loan = getLoanAmount(input);
+    const homePrice = input.downPaymentInPrincipal
+        ? input.principal
+        : input.principal + getDownPaymentAmount(input);
+    return homePrice > 0 && loan / homePrice > 0.8;
+}
+
+/**
+ * Monthly PMI in dollars. Returns 0 when PMI is not required (down payment 20% or more).
+ */
+export function getMonthlyPmi(input: MortgageInput): number {
+    if (!isPmiRequired(input)) return 0;
+
+    const pmi = input.pmi || 0;
+    if (input.pmiIsPercent === false) return pmi; // already monthly dollars
+    return (getLoanAmount(input) * pmi) / 100 / 12; // annual % of the loan
+}
+
+/**
  * Generates the full amortization schedule with optional extra payments.
  */
 export function calculateAmortization(input: MortgageInput, overrideBaseDate?: Date): MortgageSummary {
@@ -78,8 +128,16 @@ export function calculateAmortization(input: MortgageInput, overrideBaseDate?: D
         propertyTax = 0,
         homeInsurance = 0,
         pmi = 0,
+        water = 0,
+        electricity = 0,
+        gas = 0,
+        trashSewer = 0,
+        hoaDues = 0,
+        internet = 0,
         monthlyCostsEnabled = false
     } = input;
+
+    const otherMonthlyCosts = water + electricity + gas + trashSewer + hoaDues + internet;
 
     let accumulatedInterest = 0;
     const schedule: AmortizationRow[] = [];
@@ -195,7 +253,7 @@ export function calculateAmortization(input: MortgageInput, overrideBaseDate?: D
         interestSaved: standardTotalInterest - accumulatedInterest,
         monthsSaved: standardMonths - schedule.length,
         realMonthlyPayment: monthlyCostsEnabled
-            ? standardMonthlyPayment + (propertyTax / 12) + (homeInsurance / 12) + pmi
+            ? standardMonthlyPayment + (propertyTax / 12) + (homeInsurance / 12) + pmi + otherMonthlyCosts
             : standardMonthlyPayment
     };
 }
