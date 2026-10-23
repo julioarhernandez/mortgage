@@ -101,15 +101,6 @@ export function CalculatorForm({ input, onChange }: CalculatorFormProps) {
                         })}
                     </div>
                 </div>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '4px' }}>
-                    <input
-                        type="checkbox"
-                        checked={!!input.downPaymentInPrincipal}
-                        onChange={(e) => onChange({ ...input, downPaymentInPrincipal: e.target.checked })}
-                        style={{ accentColor: 'var(--accent-primary)', width: '14px', height: '14px' }}
-                    />
-                    Part of home price (reduces the loan)
-                </label>
                 <p className="text-muted" style={{ fontSize: '0.8rem', marginTop: '4px' }}>
                     Down payment: {formatMoney(getDownPaymentAmount(input))} · Loan amount: {formatMoney(getLoanAmount(input))}
                 </p>

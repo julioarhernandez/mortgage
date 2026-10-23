@@ -18,7 +18,6 @@ export interface MortgageInput {
     // Down payment
     downPayment?: number; // Entered as a percent or an amount, see downPaymentIsPercent
     downPaymentIsPercent?: boolean; // true = percent of the home price (principal), false = dollar amount
-    downPaymentInPrincipal?: boolean; // true = down payment is subtracted from the home price to get the loan
     // Legacy / simple fields (used by programmatic strategies like arbitrage)
     extraMonthlyPayment?: number;
     extraYearlyPayment?: number;
@@ -84,10 +83,9 @@ export function getDownPaymentAmount(input: MortgageInput): number {
 }
 
 /**
- * Loan amount actually borrowed. Only reduced by the down payment when it is part of the principal.
+ * Loan amount: the home price minus the down payment.
  */
 export function getLoanAmount(input: MortgageInput): number {
-    if (!input.downPaymentInPrincipal) return input.principal;
     return Math.max(0, input.principal - getDownPaymentAmount(input));
 }
 
@@ -95,11 +93,8 @@ export function getLoanAmount(input: MortgageInput): number {
  * PMI only applies when the loan is over 80% of the home price (down payment under 20%).
  */
 export function isPmiRequired(input: MortgageInput): boolean {
-    const loan = getLoanAmount(input);
-    const homePrice = input.downPaymentInPrincipal
-        ? input.principal
-        : input.principal + getDownPaymentAmount(input);
-    return homePrice > 0 && loan / homePrice > 0.8;
+    const homePrice = input.principal;
+    return homePrice > 0 && getLoanAmount(input) / homePrice > 0.8;
 }
 
 /**

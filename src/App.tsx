@@ -40,7 +40,6 @@ function App() {
       internet: 0,
       downPayment: 0,
       downPaymentIsPercent: false,
-      downPaymentInPrincipal: false,
       monthlyCostsEnabled: false
     };
   });
